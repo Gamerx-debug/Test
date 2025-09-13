@@ -264,7 +264,7 @@
         let isShuffling = false;
         let isRepeating = false;
         let timeoutId;
-        const API_BASE = 'https://saavn.dev/api/search/songs';
+        const API_BASE = 'https://your-jiosaavn-api.vercel.app'; // Replace with your deployed URL
 
         function debounce(func, delay) {
             return function (...args) {
@@ -295,7 +295,7 @@
             resultsDiv.innerHTML = "<p class='loading'>Loading<span>.</span><span>.</span><span>.</span></p>";
 
             try {
-                const apiUrl = `${API_BASE}?query=${encodeURIComponent(query)}`;
+                const apiUrl = `${API_BASE}/api/search?query=${encodeURIComponent(query)}`;
                 console.log(`Fetching from: ${apiUrl}`);
                 const res = await fetch(apiUrl, { headers: { 'Accept': 'application/json' } });
                 console.log(`Response status: ${res.status}`);
@@ -305,19 +305,19 @@
                 let data;
                 try { data = JSON.parse(text); } catch (e) { throw new Error(`JSON parse error: ${e.message}`); }
                 resultsDiv.innerHTML = "";
-                if (!data.data || !data.data.results || data.data.results.length === 0) {
+                if (!data.data || data.data.length === 0) {
                     resultsDiv.innerHTML = "<p>No results found.</p>";
                     return;
                 }
-                data.data.results.forEach((song, index) => {
+                data.data.forEach((song, index) => {
                     if (index >= 10) return;
                     const div = document.createElement("div");
                     div.className = "song-card";
-                    const songTitle = (song.name || 'Unknown').replace(/&amp;/g, '&');
-                    const singers = song.artists && song.artists.primary ? song.artists.primary.map(a => a.name.replace(/&amp;/g, '&')).join(', ') : 'Unknown';
-                    const album = song.album ? song.album.name.replace(/&amp;/g, '&') : 'N/A';
-                    const imageUrl = song.image && song.image[1] ? song.image[1].url : '';
-                    const audioUrl = song.downloadUrl && song.downloadUrl[4] ? song.downloadUrl[4].url : song.url || '';
+                    const songTitle = (song.title || 'Unknown').replace(/&amp;/g, '&');
+                    const singers = (song.singers || 'Unknown').replace(/&amp;/g, '&');
+                    const album = (song.album || 'N/A').replace(/&amp;/g, '&');
+                    const imageUrl = song.image ? song.image[2]?.link || song.image[1]?.link || '' : '';
+                    const audioUrl = song.download_url?.find(u => u.quality === '320')?.link || song.download_url?.[0]?.link || '';
                     div.innerHTML = `
                         <img src="${imageUrl}" alt="${songTitle} cover" onerror="this.style.display='none';">
                         <div class="details">
