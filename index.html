@@ -264,43 +264,38 @@
         let isShuffling = false;
         let isRepeating = false;
         let timeoutId;
-        const API_BASE = 'https://test-six-mu-57.vercel.app'; // Your test URL
-
+        const API_BASE = 'https://saavn.dev';
         function debounce(func, delay) {
             return function (...args) {
                 clearTimeout(timeoutId);
                 timeoutId = setTimeout(() => func.apply(this, args), delay);
             };
         }
-
         function toggleSidebar() {
             const sidebar = document.getElementById("sidebar");
             sidebar.classList.toggle("active");
         }
-
         function showSection(section) {
             document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
             document.getElementById(section).style.display = 'block';
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             document.querySelector(`.nav-item[onclick="showSection('${section}')"]`).classList.add('active');
         }
-
-        async function fetchWithRetry(url, retries = 2, delay = 1000) {
+        async function fetchWithRetry(url, retries = 3, delay = 2000) {
             for (let i = 0; i < retries; i++) {
                 try {
                     const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
                     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                     const text = await res.text();
-                    console.log(`Fetch attempt ${i + 1} response: ${text.substring(0, 200)}...`);
+                    console.log(`Fetch success: ${text.substring(0, 200)}...`);
                     return JSON.parse(text);
                 } catch (err) {
-                    console.error(`Fetch attempt ${i + 1} failed: ${err.message}`);
+                    console.error(`Fetch attempt ${i + 1} failed: ${err.message}. Retrying...`);
                     if (i === retries - 1) throw err;
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
         }
-
         async function searchSongs() {
             const query = document.getElementById("query").value.trim();
             const resultsDiv = document.getElementById("results");
@@ -309,25 +304,24 @@
                 return;
             }
             resultsDiv.innerHTML = "<p class='loading'>Loading<span>.</span><span>.</span><span>.</span></p>";
-
             try {
-                const apiUrl = `${API_BASE}/api/search?query=${encodeURIComponent(query)}`;
+                const apiUrl = `${API_BASE}/api/search/songs?query=${encodeURIComponent(query)}`;
                 console.log(`Fetching from: ${apiUrl}`);
                 const data = await fetchWithRetry(apiUrl);
                 resultsDiv.innerHTML = "";
-                if (!data.data || data.data.length === 0) {
+                if (!data.success || !data.data.results || data.data.results.length === 0) {
                     resultsDiv.innerHTML = "<p>No results found.</p>";
                     return;
                 }
-                data.data.forEach((song, index) => {
+                data.data.results.forEach((song, index) => {
                     if (index >= 10) return;
                     const div = document.createElement("div");
                     div.className = "song-card";
-                    const songTitle = (song.title || 'Unknown').replace(/&amp;/g, '&');
-                    const singers = (song.singers || 'Unknown').replace(/&amp;/g, '&');
-                    const album = (song.album || 'N/A').replace(/&amp;/g, '&');
-                    const imageUrl = song.image ? song.image[2]?.link || song.image[1]?.link || '' : '';
-                    const audioUrl = song.download_url?.find(u => u.quality === '320')?.link || song.download_url?.[0]?.link || '';
+                    const songTitle = (song.name || 'Unknown').replace(/&amp;/g, '&');
+                    const singers = (song.artists && song.artists.primary ? song.artists.primary.map(a => a.name).join(', ') : 'Unknown').replace(/&amp;/g, '&');
+                    const album = (song.album && song.album.name || 'N/A').replace(/&amp;/g, '&');
+                    const imageUrl = song.image ? (song.image[2] ? song.image[2].url : '') : (song.artists.primary[0].image[2] ? song.artists.primary[0].image[2].url : '');
+                    const audioUrl = song.downloadUrl ? (song.downloadUrl.find(u => u.quality === '320kbps') ? song.downloadUrl.find(u => u.quality === '320kbps').url : song.downloadUrl[0].url) : '';
                     div.innerHTML = `
                         <img src="${imageUrl}" alt="${songTitle} cover" onerror="this.style.display='none';">
                         <div class="details">
@@ -339,16 +333,14 @@
                     resultsDiv.appendChild(div);
                 });
             } catch (err) {
-                resultsDiv.innerHTML = `<p>Error fetching data: ${err.message}</p>`;
+                resultsDiv.innerHTML = `<p>Error fetching data: ${err.message}. Check if API is up.</p>`;
                 console.error(err);
             }
         }
-
         function addToQueue(url, title, artists, image) {
             queue.push({ url, title, artists, image });
             if (currentIndex === -1) playNext();
         }
-
         function playNext() {
             if (isShuffling) {
                 currentIndex = Math.floor(Math.random() * queue.length);
@@ -361,13 +353,11 @@
             }
             playQueue();
         }
-
         function playPrevious() {
             if (currentIndex > 0) currentIndex--;
             else if (isRepeating) currentIndex = queue.length - 1;
             playQueue();
         }
-
         function playQueue() {
             if (currentIndex >= 0 && currentIndex < queue.length) {
                 if (currentAudio) currentAudio.pause();
@@ -379,7 +369,6 @@
                 updateProgress();
             }
         }
-
         function togglePlay() {
             if (currentAudio) {
                 if (currentAudio.paused) {
@@ -391,38 +380,31 @@
                 }
             }
         }
-
         function toggleMute() {
             if (currentAudio) {
                 currentAudio.muted = !currentAudio.muted;
                 document.getElementById("muteBtn").textContent = currentAudio.muted ? "🔇" : "🔊";
             }
         }
-
         function toggleShuffle() {
             isShuffling = !isShuffling;
             document.querySelector('button[onclick="toggleShuffle()"]').style.color = isShuffling ? '#1DB954' : '#B3B3B3';
         }
-
         function toggleRepeat() {
             isRepeating = !isRepeating;
             document.querySelector('button[onclick="toggleRepeat()"]').style.color = isRepeating ? '#1DB954' : '#B3B3B3';
         }
-
         function seekAudio(value) {
             if (currentAudio && currentAudio.duration) {
                 currentAudio.currentTime = (value / 100) * currentAudio.duration;
             }
         }
-
         function setVolume(value) {
             if (currentAudio) currentAudio.volume = value;
         }
-
         function updateProgress() {
             if (currentAudio) {
                 const progress = document.getElementById("progress");
-                const volume = document.getElementById("volume");
                 const interval = setInterval(() => {
                     if (!currentAudio.paused && !isNaN(currentAudio.duration)) {
                         const value = (currentAudio.currentTime / currentAudio.duration) * 100;
@@ -430,9 +412,9 @@
                     }
                     if (currentAudio.ended) playNext();
                 }, 500);
+                currentAudio.addEventListener('ended', () => clearInterval(interval));
             }
         }
-
         document.getElementById("query").addEventListener("input", debounce(() => searchSongs(), 500));
         document.getElementById("query").addEventListener("keypress", (e) => { if (e.key === "Enter") searchSongs(); });
     </script>
