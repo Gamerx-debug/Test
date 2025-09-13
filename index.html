@@ -264,7 +264,7 @@
         let isShuffling = false;
         let isRepeating = false;
         let timeoutId;
-        const API_BASE = 'https://your-jiosaavn-api.vercel.app'; // Replace with your deployed URL
+        const API_BASE = 'https://test-six-mu-57.vercel.app'; // Your test URL
 
         function debounce(func, delay) {
             return function (...args) {
@@ -285,6 +285,22 @@
             document.querySelector(`.nav-item[onclick="showSection('${section}')"]`).classList.add('active');
         }
 
+        async function fetchWithRetry(url, retries = 2, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    const text = await res.text();
+                    console.log(`Fetch attempt ${i + 1} response: ${text.substring(0, 200)}...`);
+                    return JSON.parse(text);
+                } catch (err) {
+                    console.error(`Fetch attempt ${i + 1} failed: ${err.message}`);
+                    if (i === retries - 1) throw err;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
         async function searchSongs() {
             const query = document.getElementById("query").value.trim();
             const resultsDiv = document.getElementById("results");
@@ -297,13 +313,7 @@
             try {
                 const apiUrl = `${API_BASE}/api/search?query=${encodeURIComponent(query)}`;
                 console.log(`Fetching from: ${apiUrl}`);
-                const res = await fetch(apiUrl, { headers: { 'Accept': 'application/json' } });
-                console.log(`Response status: ${res.status}`);
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                const text = await res.text();
-                console.log(`Response preview: ${text.substring(0, 200)}...`);
-                let data;
-                try { data = JSON.parse(text); } catch (e) { throw new Error(`JSON parse error: ${e.message}`); }
+                const data = await fetchWithRetry(apiUrl);
                 resultsDiv.innerHTML = "";
                 if (!data.data || data.data.length === 0) {
                     resultsDiv.innerHTML = "<p>No results found.</p>";
