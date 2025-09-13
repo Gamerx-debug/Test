@@ -1,0 +1,11 @@
+"engines": {
+  "node": ">=18.0.0 <20.0.0"
+},
+"vercel": {
+  "builds": [
+    {
+      "src": "dist/server.js",
+      "use": "@vercel/node"
+    }
+  ]
+}
