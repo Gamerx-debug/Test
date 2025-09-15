@@ -3,420 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Pioneer</title>
-    <meta name="description" content="Discover and stream music with Music Pioneer.">
-    <meta name="keywords" content="music, streaming, jiosaavn, pioneer">
-    <meta property="og:title" content="Music Pioneer">
-    <meta property="og:image" content="https://yourdomain.com/preview.jpg">
+    <title>MusicPioneer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Arial', sans-serif;
-            background: #121212;
-            color: #FFFFFF;
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #1f2937;
+            color: #ffffff;
         }
-        .sidebar {
-            width: 240px;
-            background: #000000;
-            padding: 20px 0;
-            position: fixed;
-            height: 100%;
-            transition: width 0.3s;
+        .song-item, .playlist-item, .trending-item {
+            transition: background-color 0.2s;
         }
-        .sidebar.collapsed { width: 70px; }
-        .sidebar .logo {
-            padding: 0 20px;
-            margin-bottom: 20px;
-            text-align: center;
+        .song-item:hover, .playlist-item:hover, .trending-item:hover {
+            background-color: #374151;
         }
-        .sidebar .logo span {
-            font-size: 24px;
-            color: #1DB954;
-            font-weight: bold;
-        }
-        .sidebar .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 8px 20px;
-            color: #B3B3B3;
-            text-decoration: none;
-            font-size: 16px;
-        }
-        .sidebar .nav-item.active,
-        .sidebar .nav-item:hover {
-            color: #1DB954;
-            background: #282828;
-            border-radius: 0 20px 20px 0;
-        }
-        .sidebar .nav-item i { margin-right: 10px; }
-        .sidebar.collapsed .nav-item span { display: none; }
-        .hamburger {
-            display: none;
-            font-size: 24px;
-            padding: 10px;
-            cursor: pointer;
-            color: #B3B3B3;
-        }
-        .hamburger:hover { color: #1DB954; }
-        @media (max-width: 768px) {
-            .sidebar { width: 0; }
-            .hamburger { display: block; position: absolute; top: 20px; left: 20px; }
-            .sidebar.active { width: 240px; }
-            .main-content { margin-left: 0; width: 100%; }
-            .player-bar { left: 0; }
-        }
-        .main-content {
-            margin-left: 240px;
-            width: calc(100% - 240px);
-            padding: 20px;
-            transition: margin-left 0.3s, width 0.3s;
-        }
-        .sidebar.collapsed + .main-content { margin-left: 70px; width: calc(100% - 70px); }
-        .sidebar.active + .main-content { margin-left: 240px; width: calc(100% - 240px); }
-        .section {
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #181818;
-            border-radius: 8px;
-        }
-        .section h2 { color: #1DB954; margin-bottom: 10px; }
-        .search-bar {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .search-bar input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #404040;
-            background: #121212;
-            color: #FFFFFF;
-            border-radius: 4px;
-            outline: none;
-        }
-        .search-bar input::placeholder { color: #B3B3B3; }
-        .search-bar button {
-            padding: 10px 20px;
-            margin-left: 10px;
-            background: #1DB954;
-            border: none;
-            color: #FFFFFF;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .search-bar button:hover { background: #1ed760; }
-        .results, .trending, .playlists {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        .song-card, .trending-card, .playlist-card {
-            background: #282828;
-            border-radius: 4px;
-            padding: 10px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .song-card:hover, .trending-card:hover, .playlist-card:hover { transform: scale(1.02); }
-        .song-card img, .trending-card img, .playlist-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 4px;
-            loading: lazy;
-        }
-        .song-card .details, .trending-card .details, .playlist-card .details {
-            margin-top: 10px;
-            color: #FFFFFF;
-        }
-        .song-card .details strong, .trending-card .details strong, .playlist-card .details strong { color: #1DB954; }
-        .player-bar {
+        #player {
             position: fixed;
             bottom: 0;
-            left: 240px;
+            left: 0;
             right: 0;
-            height: 90px;
-            background: #282828;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            transition: left 0.3s;
+            background: #111827;
+            padding: 10px;
         }
-        .sidebar.collapsed + .main-content .player-bar { left: 70px; }
-        .sidebar.active + .main-content .player-bar { left: 240px; }
-        .player-bar .controls {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-grow: 1;
+        #trending-carousel {
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
         }
-        .player-bar button {
-            background: none;
-            border: none;
-            color: #B3B3B3;
-            font-size: 20px;
-            cursor: pointer;
+        .trending-item {
+            scroll-snap-align: start;
         }
-        .player-bar button:hover { color: #1DB954; }
-        .player-bar .progress {
-            flex-grow: 1;
-            margin: 0 20px;
-        }
-        .player-bar .progress input {
-            width: 100%;
-            height: 4px;
-            background: #404040;
-            -webkit-appearance: none;
-            cursor: pointer;
-        }
-        .player-bar .progress input::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            background: #1DB954;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .player-bar .volume {
-            width: 100px;
-            height: 4px;
-            background: #404040;
-            -webkit-appearance: none;
-            cursor: pointer;
-        }
-        .player-bar .volume::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            background: #1DB954;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .loading { text-align: center; color: #B3B3B3; font-size: 1.2em; }
-        .loading span { animation: blink 1s infinite; }
-        .loading span:nth-child(2) { animation-delay: 0.2s; }
-        .loading span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
-<body>
-    <div class="hamburger" onclick="toggleSidebar()">☰</div>
-    <div class="sidebar" id="sidebar">
-        <div class="logo"><span>Music Pioneer</span></div>
-        <a href="#" class="nav-item active" onclick="showSection('home')"><i>🏠</i><span>Home</span></a>
-        <a href="#" class="nav-item" onclick="showSection('search')"><i>🔍</i><span>Search</span></a>
-        <a href="#" class="nav-item" onclick="showSection('library')"><i>📚</i><span>Library</span></a>
-    </div>
-    <div class="main-content" id="mainContent">
-        <div id="home" class="section">
-            <h2>Home</h2>
-            <div class="trending" id="trending">
-                <div class="trending-card">
-                    <img src="https://via.placeholder.com/200x200?text=Trending+1" alt="Trending 1">
-                    <div class="details"><strong>Deva Deva</strong><span>Arijit Singh</span></div>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-indigo-800 p-4">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-2xl font-bold">MusicPioneer</h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto mt-6 px-4">
+        <!-- Trending Songs -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">Trending Songs</h2>
+            <div id="trending-carousel" class="flex gap-4">
+                <div id="trending-loading" class="text-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+                    <p>Loading...</p>
                 </div>
-                <div class="trending-card">
-                    <img src="https://via.placeholder.com/200x200?text=Trending+2" alt="Trending 2">
-                    <div class="details"><strong>Kesariya</strong><span>Pritam</span></div>
-                </div>
+                <div id="trending-results" class="flex gap-4"></div>
             </div>
         </div>
-        <div id="search" class="section" style="display:none;">
-            <div class="search-bar">
-                <input type="text" id="query" placeholder="Search for artists, songs, or albums...">
-                <button onclick="searchSongs()">Search</button>
-            </div>
-            <div class="results" id="results"></div>
+
+        <!-- Search -->
+        <div class="flex gap-2 mb-6">
+            <input
+                type="text"
+                id="search-input"
+                placeholder="Enter song name or artist..."
+                class="flex-grow p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+            >
+            <button
+                id="search-button"
+                onclick="searchSongs()"
+                class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600"
+            >
+                Search
+            </button>
         </div>
-        <div id="library" class="section" style="display:none;">
-            <h2>Library</h2>
-            <div class="playlists" id="playlists">
-                <div class="playlist-card">
-                    <img src="https://via.placeholder.com/200x200?text=Liked+Songs" alt="Liked Songs">
-                    <div class="details"><strong>Liked Songs</strong></div>
-                </div>
-            </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="text-center mt-4 hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+            <p>Loading...</p>
         </div>
-    </div>
-    <div class="player-bar" id="playerBar">
-        <div class="controls">
-            <button onclick="toggleShuffle()">🔀</button>
-            <button onclick="playPrevious()">⏮</button>
-            <button onclick="togglePlay()" id="playBtn">▶</button>
-            <button onclick="playNext()">⏭</button>
-            <button onclick="toggleRepeat()">🔁</button>
-            <div class="progress">
-                <input type="range" min="0" max="100" value="0" id="progress" oninput="seekAudio(this.value)">
-            </div>
-            <button onclick="toggleMute()" id="muteBtn">🔊</button>
-            <div class="volume">
-                <input type="range" min="0" max="1" step="0.01" value="1" id="volume" oninput="setVolume(this.value)">
+
+        <!-- Search Results -->
+        <div class="flex gap-4">
+            <div id="results" class="flex-1"></div>
+            <div id="playlist-sidebar" class="w-64 bg-gray-800 p-4 rounded hidden">
+                <h2 class="text-lg font-semibold mb-4">My Playlist</h2>
+                <div id="playlist-items"></div>
             </div>
         </div>
     </div>
+
+    <!-- Now Playing Card -->
+    <div id="now-playing" class="max-w-4xl mx-auto mt-6 px-4 hidden">
+        <div class="bg-gray-800 p-4 rounded flex gap-4">
+            <img id="now-playing-art" src="https://via.placeholder.com/100" alt="Now Playing" class="w-16 h-16 object-cover rounded">
+            <div class="flex-1">
+                <h3 id="now-playing-title" class="text-lg font-semibold">No song playing</h3>
+                <p id="now-playing-artist" class="text-sm text-gray-400">Select a song to play</p>
+                <p id="now-playing-album" class="text-sm text-gray-500"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Player -->
+    <div id="player" class="flex items-center gap-4">
+        <img id="player-art" src="https://via.placeholder.com/50" alt="Now Playing" class="w-12 h-12 object-cover rounded">
+        <div class="flex-1">
+            <p id="player-title" class="text-sm font-semibold">No song playing</p>
+            <p id="player-artist" class="text-xs text-gray-300">Select a song to play</p>
+        </div>
+        <audio id="audio-player" controls class="flex-1"></audio>
+    </div>
+
     <script>
-        let currentAudio = null;
-        let queue = [];
-        let currentIndex = -1;
-        let isShuffling = false;
-        let isRepeating = false;
-        let timeoutId;
-        const API_BASE = 'https://saavn.dev';
-        function debounce(func, delay) {
-            return function (...args) {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => func.apply(this, args), delay);
-            };
+        // Playlist Management
+        let playlist = JSON.parse(localStorage.getItem('playlist')) || [];
+        function savePlaylist() {
+            localStorage.setItem('playlist', JSON.stringify(playlist));
+            renderPlaylist();
         }
-        function toggleSidebar() {
-            const sidebar = document.getElementById("sidebar");
-            sidebar.classList.toggle("active");
-        }
-        function showSection(section) {
-            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-            document.getElementById(section).style.display = 'block';
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.querySelector(`.nav-item[onclick="showSection('${section}')"]`).classList.add('active');
-        }
-        async function fetchWithRetry(url, retries = 3, delay = 2000) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                    const text = await res.text();
-                    console.log(`Fetch success: ${text.substring(0, 200)}...`);
-                    return JSON.parse(text);
-                } catch (err) {
-                    console.error(`Fetch attempt ${i + 1} failed: ${err.message}. Retrying...`);
-                    if (i === retries - 1) throw err;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
+        function addToPlaylist(song) {
+            if (!playlist.find(s => s.id === song.id)) {
+                playlist.push({ id: song.id, name: song.name, artists: song.artists.primary, image: song.image[2]?.url });
+                savePlaylist();
             }
         }
-        async function searchSongs() {
-            const query = document.getElementById("query").value.trim();
-            const resultsDiv = document.getElementById("results");
-            if (!query) {
-                resultsDiv.innerHTML = "<p>No search term entered.</p>";
-                return;
-            }
-            resultsDiv.innerHTML = "<p class='loading'>Loading<span>.</span><span>.</span><span>.</span></p>";
-            try {
-                const apiUrl = `${API_BASE}/api/search/songs?query=${encodeURIComponent(query)}`;
-                console.log(`Fetching from: ${apiUrl}`);
-                const data = await fetchWithRetry(apiUrl);
-                resultsDiv.innerHTML = "";
-                if (!data.success || !data.data.results || data.data.results.length === 0) {
-                    resultsDiv.innerHTML = "<p>No results found.</p>";
-                    return;
-                }
-                data.data.results.forEach((song, index) => {
-                    if (index >= 10) return;
-                    const div = document.createElement("div");
-                    div.className = "song-card";
-                    const songTitle = (song.name || 'Unknown').replace(/&amp;/g, '&');
-                    const singers = (song.artists && song.artists.primary ? song.artists.primary.map(a => a.name).join(', ') : 'Unknown').replace(/&amp;/g, '&');
-                    const album = (song.album && song.album.name || 'N/A').replace(/&amp;/g, '&');
-                    const imageUrl = song.image ? (song.image[2] ? song.image[2].url : '') : (song.artists.primary[0].image[2] ? song.artists.primary[0].image[2].url : '');
-                    const audioUrl = song.downloadUrl ? (song.downloadUrl.find(u => u.quality === '320kbps') ? song.downloadUrl.find(u => u.quality === '320kbps').url : song.downloadUrl[0].url) : '';
-                    div.innerHTML = `
-                        <img src="${imageUrl}" alt="${songTitle} cover" onerror="this.style.display='none';">
-                        <div class="details">
-                            <strong>${songTitle}</strong><br>
-                            <span>${singers} • ${album}</span>
-                        </div>
-                    `;
-                    div.onclick = () => addToQueue(audioUrl, songTitle, singers, imageUrl);
-                    resultsDiv.appendChild(div);
-                });
-            } catch (err) {
-                resultsDiv.innerHTML = `<p>Error fetching data: ${err.message}. Check if API is up.</p>`;
-                console.error(err);
-            }
+        function removeFromPlaylist(songId) {
+            playlist = playlist.filter(s => s.id !== songId);
+            savePlaylist();
         }
-        function addToQueue(url, title, artists, image) {
-            queue.push({ url, title, artists, image });
-            if (currentIndex === -1) playNext();
-        }
-        function playNext() {
-            if (isShuffling) {
-                currentIndex = Math.floor(Math.random() * queue.length);
-            } else if (currentIndex + 1 < queue.length) {
-                currentIndex++;
-            } else if (isRepeating) {
-                currentIndex = 0;
-            } else {
-                return;
-            }
-            playQueue();
-        }
-        function playPrevious() {
-            if (currentIndex > 0) currentIndex--;
-            else if (isRepeating) currentIndex = queue.length - 1;
-            playQueue();
-        }
-        function playQueue() {
-            if (currentIndex >= 0 && currentIndex < queue.length) {
-                if (currentAudio) currentAudio.pause();
-                const { url, title, artists } = queue[currentIndex];
-                currentAudio = new Audio(url);
-                document.getElementById("playBtn").textContent = "⏸";
-                currentAudio.play().catch(err => console.error("Play error:", err));
-                document.title = `Now Playing: ${title} - ${artists}`;
-                updateProgress();
-            }
-        }
-        function togglePlay() {
-            if (currentAudio) {
-                if (currentAudio.paused) {
-                    currentAudio.play().catch(err => console.error("Play error:", err));
-                    document.getElementById("playBtn").textContent = "⏸";
-                } else {
-                    currentAudio.pause();
-                    document.getElementById("playBtn").textContent = "▶";
-                }
-            }
-        }
-        function toggleMute() {
-            if (currentAudio) {
-                currentAudio.muted = !currentAudio.muted;
-                document.getElementById("muteBtn").textContent = currentAudio.muted ? "🔇" : "🔊";
-            }
-        }
-        function toggleShuffle() {
-            isShuffling = !isShuffling;
-            document.querySelector('button[onclick="toggleShuffle()"]').style.color = isShuffling ? '#1DB954' : '#B3B3B3';
-        }
-        function toggleRepeat() {
-            isRepeating = !isRepeating;
-            document.querySelector('button[onclick="toggleRepeat()"]').style.color = isRepeating ? '#1DB954' : '#B3B3B3';
-        }
-        function seekAudio(value) {
-            if (currentAudio && currentAudio.duration) {
-                currentAudio.currentTime = (value / 100) * currentAudio.duration;
-            }
-        }
-        function setVolume(value) {
-            if (currentAudio) currentAudio.volume = value;
-        }
-        function updateProgress() {
-            if (currentAudio) {
-                const progress = document.getElementById("progress");
-                const interval = setInterval(() => {
-                    if (!currentAudio.paused && !isNaN(currentAudio.duration)) {
-                        const value = (currentAudio.currentTime / currentAudio.duration) * 100;
-                        progress.value = value;
+        function renderPlaylist() {
+            const playlistDiv = document.getElementById('playlist-items');
+            playlistDiv.innerHTML = playlist.length ? '' : '<p class="text-gray-400">No songs in playlist</p>';
+            playlist.forEach(song => {
+                const item = document.createElement('div');
+                item.className = 'playlist-item bg-gray-700 p-2 rounded flex gap-2 mb-2';
+                item.innerHTML = `
+                    <img src="${song.image || 'https://via.placeholder.com/50'}" alt="${song.name}" class="w-8 h-8 object-cover rounded">
+                    <div class="flex-1">
+                        <p class="text-sm">${song.name}</p>
+                        <p class="text-xs text-gray-400">${song.artists.map(a => a.name).join(', ')}</p>
+                    </div>
+                    <button onclick="removeFromPlaylist('${song.id}')" class="text-red-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+                item.onclick = (e) => {
+                    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'svg' && e.target.tagName !== 'path') {
+                        playSongFromId(song.id);
                     }
-                    if (currentAudio.ended) playNext();
-                }, 500);
-                currentAudio.addEventListener('ended', () => clearInterval(interval));
+                };
+                playlistDiv.appendChild(item);
+            });
+        }
+        renderPlaylist();
+
+        // Trending Songs (Static Fallback)
+        function fetchTrendingSongs() {
+            document.getElementById('trending-loading').style.display = 'block';
+            const trendingResults = document.getElementById('trending-results');
+            trendingResults.innerHTML = '';
+            // Static list as fallback (replace with API if confirmed)
+            const trendingSongs = [
+                { id: 'abc123', name: 'Tum Hi Ho', artists: [{ name: 'Arijit Singh' }], image: [{ quality: '500x500', url: 'https://via.placeholder.com/150' }], language: 'Hindi' },
+                { id: 'def456', name: 'Believer', artists: [{ name: 'Imagine Dragons' }], image: [{ quality: '500x500', url: 'https://via.placeholder.com/150' }], language: 'English' },
+                { id: 'ghi789', name: 'Millionaire', artists: [{ name: 'Yo Yo Honey Singh' }], image: [{ quality: '500x500', url: 'https://via.placeholder.com/150' }], language: 'Punjabi' },
+                { id: 'jkl012', name: 'Naatu Naatu', artists: [{ name: 'Rahul Sipligunj' }], image: [{ quality: '500x500', url: 'https://via.placeholder.com/150' }], language: 'Tamil' },
+            ];
+            displayTrendingSongs(trendingSongs);
+            document.getElementById('trending-loading').style.display = 'none';
+            // Uncomment to try API-based trending (test first)
+            /*
+            const languages = ['Hindi', 'English', 'Punjabi', 'Tamil'];
+            for (const lang of languages) {
+                fetch(`https://annonymous-sage.vercel.app/api/search/songs?query=top ${lang}&limit=3`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.data && data.data.results) {
+                            displayTrendingSongs(data.data.results, lang);
+                        }
+                    })
+                    .catch(error => console.error(`Error fetching trending ${lang}:`, error));
+            }
+            */
+        }
+        function displayTrendingSongs(songs, language = '') {
+            const trendingDiv = document.getElementById('trending-results');
+            songs.forEach(song => {
+                const item = document.createElement('div');
+                item.className = 'trending-item bg-gray-800 p-3 rounded w-40 flex-shrink-0';
+                item.innerHTML = `
+                    <img src="${song.image[0]?.url || 'https://via.placeholder.com/150'}" alt="${song.name}" class="w-full h-24 object-cover rounded mb-2">
+                    <h3 class="text-sm">${song.name}</h3>
+                    <p class="text-xs text-gray-400">${song.artists.map(a => a.name).join(', ')}</p>
+                    <p class="text-xs text-gray-500">${language || song.language}</p>
+                `;
+                item.onclick = () => playSong(song);
+                trendingDiv.appendChild(item);
+            });
+        }
+        fetchTrendingSongs();
+
+        // Search
+        function searchSongs() {
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) {
+                alert('Please enter a search query.');
+                return;
+            }
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('loading-spinner').style.display = 'block';
+            const apiUrl = `https://annonymous-sage.vercel.app/api/search/songs?query=${encodeURIComponent(query)}&limit=20`;
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('loading-spinner').style.display = 'none';
+                    console.log('Search response:', data); // Debug
+                    if (data.success && data.data && data.data.results) {
+                        displayResults(data.data.results);
+                        document.getElementById('playlist-sidebar').classList.remove('hidden');
+                    } else {
+                        document.getElementById('results').innerHTML = '<p class="text-center text-gray-400">No results found or error in response.</p>';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loading-spinner').style.display = 'none';
+                    document.getElementById('results').innerHTML = '<p class="text-center text-red-400">Error fetching results. Please try again.</p>';
+                    console.error('Error fetching data:', error);
+                });
+        }
+
+        function displayResults(songs) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            songs.forEach(song => {
+                const songDiv = document.createElement('div');
+                songDiv.className = 'song-item bg-gray-800 p-3 rounded mb-2 flex gap-3';
+                songDiv.innerHTML = `
+                    <img src="${song.image[2]?.url || 'https://via.placeholder.com/100'}" alt="${song.name}" class="w-12 h-12 object-cover rounded">
+                    <div class="flex-1">
+                        <strong>${song.name}</strong> - ${song.artists.primary.map(artist => artist.name).join(', ')}<br>
+                        Album: ${song.album.name} | Duration: ${formatDuration(song.duration)} | Language: ${song.language}
+                        <div>
+                            <button onclick="event.stopPropagation(); addToPlaylist(${JSON.stringify(song)})" class="text-indigo-400 text-sm">Add to Playlist</button>
+                        </div>
+                    </div>
+                `;
+                songDiv.onclick = () => playSong(song);
+                resultsDiv.appendChild(songDiv);
+            });
+        }
+
+        // Play Song
+        function playSong(song) {
+            const player = document.getElementById('audio-player');
+            const playerArt = document.getElementById('player-art');
+            const playerTitle = document.getElementById('player-title');
+            const playerArtist = document.getElementById('player-artist');
+            const nowPlaying = document.getElementById('now-playing');
+            const nowPlayingArt = document.getElementById('now-playing-art');
+            const nowPlayingTitle = document.getElementById('now-playing-title');
+            const nowPlayingArtist = document.getElementById('now-playing-artist');
+            const nowPlayingAlbum = document.getElementById('now-playing-album');
+            const downloadUrls = song.downloadUrl || [];
+            const highestQualityUrl = downloadUrls.length > 0 ? downloadUrls[downloadUrls.length - 1].url : null;
+            if (highestQualityUrl) {
+                player.src = highestQualityUrl;
+                playerArt.src = song.image[2]?.url || 'https://via.placeholder.com/50';
+                playerTitle.textContent = song.name;
+                playerArtist.textContent = song.artists.primary.map(a => a.name).join(', ');
+                nowPlaying.classList.remove('hidden');
+                nowPlayingArt.src = song.image[2]?.url || 'https://via.placeholder.com/100';
+                nowPlayingTitle.textContent = song.name;
+                nowPlayingArtist.textContent = song.artists.primary.map(a => a.name).join(', ');
+                nowPlayingAlbum.textContent = `Album: ${song.album.name}`;
+                player.play().catch(error => {
+                    console.error('Error playing audio:', error);
+                    alert('Unable to play the song. It might be restricted or the link expired.');
+                });
+            } else {
+                alert('No download URL available for this song.');
             }
         }
-        document.getElementById("query").addEventListener("input", debounce(() => searchSongs(), 500));
-        document.getElementById("query").addEventListener("keypress", (e) => { if (e.key === "Enter") searchSongs(); });
+
+        function playSongFromId(songId) {
+            fetch(`https://annonymous-sage.vercel.app/api/songs/${songId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Song response:', data); // Debug
+                    if (data.success && data.data) {
+                        playSong(data.data);
+                    } else {
+                        alert('Could not load song.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching song:', error);
+                    alert('Error fetching song.');
+                });
+        }
+
+        // Utility
+        function formatDuration(seconds) {
+            if (!seconds) return 'N/A';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
     </script>
 </body>
 </html>
