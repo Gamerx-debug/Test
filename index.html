@@ -33,6 +33,69 @@
         .trending-item {
             scroll-snap-align: start;
         }
+        #now-playing-card {
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+        #now-playing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4); /* Overlay for readability */
+        }
+        #vinyl-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: auto;
+        }
+        #progress-bar {
+            width: 80%;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            margin-top: 20px;
+        }
+        #progress-fill {
+            height: 100%;
+            background: white;
+            width: 0%;
+        }
+        #time-display {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        #heart-icon {
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        /* Theme classes */
+        .theme-english {
+            background: linear-gradient(to bottom, rgba(0,0,255,0.3), transparent);
+        }
+        .theme-hindi {
+            background: linear-gradient(to bottom, rgba(255,0,0,0.3), transparent);
+        }
+        .theme-punjabi {
+            background: linear-gradient(to bottom, rgba(255,165,0,0.3), transparent);
+        }
+        .theme-tamil {
+            background: linear-gradient(to bottom, rgba(0,128,0,0.3), transparent);
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -92,13 +155,21 @@
 
     <!-- Now Playing Card -->
     <div id="now-playing" class="max-w-4xl mx-auto mt-6 px-4 hidden">
-        <div class="bg-gray-800 p-4 rounded flex gap-4">
-            <img id="now-playing-art" src="https://via.placeholder.com/100" alt="Now Playing" class="w-16 h-16 object-cover rounded">
-            <div class="flex-1">
-                <h3 id="now-playing-title" class="text-lg font-semibold">No song playing</h3>
-                <p id="now-playing-artist" class="text-sm text-gray-400">Select a song to play</p>
-                <p id="now-playing-album" class="text-sm text-gray-500"></p>
+        <div id="now-playing-card" class="rounded-lg">
+            <img id="vinyl-overlay" src="https://pngimg.com/uploads/vinyl/vinyl_PNG99.png" alt="Vinyl Record">
+            <h3 id="now-playing-artist" class="text-lg font-semibold z-10">Artist Name</h3>
+            <h1 id="now-playing-title" class="text-4xl font-bold z-10">SYMPHONY</h1>
+            <p class="text-sm z-10">Jazz Music Vol. 10</p>
+            <div id="progress-bar" class="z-10">
+                <div id="progress-fill"></div>
             </div>
+            <div id="time-display" class="z-10">
+                <span id="current-time">0:00</span> / <span id="duration">0:00</span>
+            </div>
+            <svg id="heart-icon" class="w-6 h-6 z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <p class="text-sm z-10">NEW ALBUM</p>
         </div>
     </div>
 
@@ -162,7 +233,7 @@
             document.getElementById('trending-loading').style.display = 'block';
             const trendingResults = document.getElementById('trending-results');
             trendingResults.innerHTML = '';
-            // Static list as fallback (replace with API if confirmed)
+            // Static list as fallback
             const trendingSongs = [
                 { id: 'abc123', name: 'Tum Hi Ho', artists: [{ name: 'Arijit Singh' }], image: [{ quality: '500x500', url: 'https://via.placeholder.com/150' }], language: 'Hindi' },
                 { id: 'def456', name: 'Believer', artists: [{ name: 'Imagine Dragons' }], image: [{ quality: '500x500', url: 'https://via.placeholder.com/150' }], language: 'English' },
@@ -171,20 +242,6 @@
             ];
             displayTrendingSongs(trendingSongs);
             document.getElementById('trending-loading').style.display = 'none';
-            // Uncomment to try API-based trending (test first)
-            /*
-            const languages = ['Hindi', 'English', 'Punjabi', 'Tamil'];
-            for (const lang of languages) {
-                fetch(`https://annonymous-sage.vercel.app/api/search/songs?query=top ${lang}&limit=3`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.data && data.data.results) {
-                            displayTrendingSongs(data.data.results, lang);
-                        }
-                    })
-                    .catch(error => console.error(`Error fetching trending ${lang}:`, error));
-            }
-            */
         }
         function displayTrendingSongs(songs, language = '') {
             const trendingDiv = document.getElementById('trending-results');
@@ -222,7 +279,6 @@
                 })
                 .then(data => {
                     document.getElementById('loading-spinner').style.display = 'none';
-                    console.log('Search response:', data); // Debug
                     if (data.success && data.data && data.data.results) {
                         displayResults(data.data.results);
                         document.getElementById('playlist-sidebar').classList.remove('hidden');
@@ -265,22 +321,53 @@
             const playerTitle = document.getElementById('player-title');
             const playerArtist = document.getElementById('player-artist');
             const nowPlaying = document.getElementById('now-playing');
-            const nowPlayingArt = document.getElementById('now-playing-art');
-            const nowPlayingTitle = document.getElementById('now-playing-title');
+            const nowPlayingCard = document.getElementById('now-playing-card');
             const nowPlayingArtist = document.getElementById('now-playing-artist');
-            const nowPlayingAlbum = document.getElementById('now-playing-album');
+            const nowPlayingTitle = document.getElementById('now-playing-title');
+            const progressFill = document.getElementById('progress-fill');
+            const currentTimeEl = document.getElementById('current-time');
+            const durationEl = document.getElementById('duration');
+            const heartIcon = document.getElementById('heart-icon');
             const downloadUrls = song.downloadUrl || [];
             const highestQualityUrl = downloadUrls.length > 0 ? downloadUrls[downloadUrls.length - 1].url : null;
+
             if (highestQualityUrl) {
                 player.src = highestQualityUrl;
                 playerArt.src = song.image[2]?.url || 'https://via.placeholder.com/50';
                 playerTitle.textContent = song.name;
                 playerArtist.textContent = song.artists.primary.map(a => a.name).join(', ');
                 nowPlaying.classList.remove('hidden');
-                nowPlayingArt.src = song.image[2]?.url || 'https://via.placeholder.com/100';
-                nowPlayingTitle.textContent = song.name;
+                nowPlayingCard.style.backgroundImage = `url(${song.image[2]?.url || 'https://via.placeholder.com/400'})`;
                 nowPlayingArtist.textContent = song.artists.primary.map(a => a.name).join(', ');
-                nowPlayingAlbum.textContent = `Album: ${song.album.name}`;
+                nowPlayingTitle.textContent = song.name;
+                // Set theme based on language
+                nowPlayingCard.classList.remove('theme-english', 'theme-hindi', 'theme-punjabi', 'theme-tamil');
+                switch (song.language.toLowerCase()) {
+                    case 'english':
+                        nowPlayingCard.classList.add('theme-english');
+                        break;
+                    case 'hindi':
+                        nowPlayingCard.classList.add('theme-hindi');
+                        break;
+                    case 'punjabi':
+                        nowPlayingCard.classList.add('theme-punjabi');
+                        break;
+                    case 'tamil':
+                        nowPlayingCard.classList.add('theme-tamil');
+                        break;
+                    default:
+                        // Default theme
+                        break;
+                }
+                // Heart icon click to add to playlist
+                heartIcon.onclick = () => addToPlaylist(song);
+                // Progress bar
+                player.ontimeupdate = () => {
+                    const progress = (player.currentTime / player.duration) * 100;
+                    progressFill.style.width = `${progress}%`;
+                    currentTimeEl.textContent = formatDuration(Math.floor(player.currentTime));
+                    durationEl.textContent = formatDuration(Math.floor(player.duration));
+                };
                 player.play().catch(error => {
                     console.error('Error playing audio:', error);
                     alert('Unable to play the song. It might be restricted or the link expired.');
@@ -299,7 +386,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Song response:', data); // Debug
                     if (data.success && data.data) {
                         playSong(data.data);
                     } else {
@@ -314,7 +400,7 @@
 
         // Utility
         function formatDuration(seconds) {
-            if (!seconds) return 'N/A';
+            if (!seconds) return '0:00';
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
             return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
