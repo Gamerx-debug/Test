@@ -108,6 +108,25 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* New: Mobile Nav Styles */
+        .mobile-nav {
+            display: none;
+            flex-col space-y-4 p-4;
+        }
+        .mobile-nav.open {
+            display: flex;
+        }
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen">
@@ -120,12 +139,12 @@
                 </div>
                 <h1 class="text-white text-2xl font-bold">MusicPioneer</h1>
             </div>
-            <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-6" id="desktop-nav">
                 <nav class="flex space-x-8">
-                    <a href="#" class="text-white hover:text-emerald-300 transition-colors">Home</a>
-                    <a href="#" class="text-white hover:text-emerald-300 transition-colors">Browse</a>
-                    <a href="#" class="text-white hover:text-emerald-300 transition-colors">Library</a>
-                    <a href="#" class="text-white hover:text-emerald-300 transition-colors">Playlists</a>
+                    <a href="#" class="nav-link text-white hover:text-emerald-300 transition-colors" onclick="loadSection('home')">Home</a>
+                    <a href="#" class="nav-link text-white hover:text-emerald-300 transition-colors" onclick="loadSection('browse')">Browse</a>
+                    <a href="#" class="nav-link text-white hover:text-emerald-300 transition-colors" onclick="loadSection('library')">Library</a>
+                    <a href="#" class="nav-link text-white hover:text-emerald-300 transition-colors" onclick="loadSection('playlists')">Playlists</a>
                 </nav>
                 <div class="relative">
                     <input type="text" id="search-input" placeholder="Search songs, artists..." class="bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 px-4 py-2 pr-10 rounded-full focus:outline-none focus:bg-opacity-30 transition-all w-64 md:w-64">
@@ -141,6 +160,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
+            <!-- New: Mobile Nav (Hidden by Default) -->
+            <div id="mobile-nav" class="mobile-nav absolute top-full left-0 right-0 bg-gray-800 text-white">
+                <a href="#" class="nav-link" onclick="loadSection('home'); toggleMobileNav();">Home</a>
+                <a href="#" class="nav-link" onclick="loadSection('browse'); toggleMobileNav();">Browse</a>
+                <a href="#" class="nav-link" onclick="loadSection('library'); toggleMobileNav();">Library</a>
+                <a href="#" class="nav-link" onclick="loadSection('playlists'); toggleMobileNav();">Playlists</a>
+            </div>
         </div>
     </header>
     <div class="max-w-6xl mx-auto p-6 pt-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -204,8 +230,9 @@
                                     <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
                                 </svg>
                             </button>
-                            <button id="repeatBtn" class="text-emerald-300 hover:text-white transition-colors p-3" aria-label="Repeat">
-                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <!-- Updated: Repeat Button with Modes -->
+                            <button id="repeatBtn" class="text-emerald-300 hover:text-white transition-colors p-3" aria-label="Repeat" data-mode="">
+                                <svg class="w-6 h-6 repeat-icon" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
                                 </svg>
                             </button>
@@ -215,11 +242,11 @@
                 </div>
             </div>
            
-            <!-- Featured Playlists -->
+            <!-- Featured Playlists (Updated: Real Fetch on Click) -->
             <div class="glass-effect rounded-2xl p-6">
                 <h3 class="text-2xl font-bold text-white mb-6">Featured Playlists</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist(['Chill Nights Song 1', 'Chill Nights Song 2'])">
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist('chill')">
                         <div class="flex items-center space-x-4">
                             <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
                                 <span class="text-2xl">🌙</span>
@@ -230,7 +257,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist(['Hot Hits Song 1', 'Hot Hits Song 2'])">
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist('hot hits')">
                         <div class="flex items-center space-x-4">
                             <div class="w-16 h-16 bg-gradient-to-br from-pink-400 to-red-600 rounded-lg flex items-center justify-center">
                                 <span class="text-2xl">🔥</span>
@@ -244,16 +271,16 @@
                 </div>
             </div>
            
-            <!-- Search Results -->
+            <!-- Search Results / Dynamic Content Area -->
             <div class="glass-effect rounded-2xl p-6 mt-8">
                 <div id="results"></div>
                 <div id="spinner" class="spinner hidden"></div>
             </div>
         </div>
        
-        <!-- Playlist Sidebar -->
+        <!-- Playlist Sidebar (Updated: Includes Nav on Mobile) -->
         <div id="playlist-sidebar" class="glass-effect rounded-2xl p-6 lg:block hidden">
-            <h3 class="text-2xl font-bold text-white mb-6">Up Next</h3>
+            <h3 class="text-2xl font-bold text-white mb-6" id="sidebar-title">Up Next</h3>
             <div id="playlist-items" class="space-y-3"></div>
         </div>
     </div>
@@ -299,6 +326,9 @@
         const playlistItemsDiv = document.getElementById('playlist-items');
         const playlistSidebar = document.getElementById('playlist-sidebar');
         const menuToggle = document.getElementById('menu-toggle');
+        const mobileNav = document.getElementById('mobile-nav');
+        const sidebarTitle = document.getElementById('sidebar-title');
+        const desktopNav = document.getElementById('desktop-nav');
 
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
@@ -398,13 +428,61 @@
             loadSong(currentSongIndex);
         }
 
-        function playFeaturedPlaylist(songs) {
-            playlist = songs.map((title, i) => ({
+        // Updated: Fetch Real Playlists from API
+        function playFeaturedPlaylist(query) {
+            spinner.classList.remove('hidden');
+            fetch(`https://annonymous-sage.vercel.app/api/search/playlists?query=${encodeURIComponent(query)}&limit=1`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    spinner.classList.add('hidden');
+                    if (data.success && data.data && data.data.results && data.data.results[0]) {
+                        const pl = data.data.results[0];
+                        // Fetch songs in playlist (assume /playlist/{id}/songs endpoint; adjust if needed)
+                        return fetch(`https://annonymous-sage.vercel.app/api/playlist/${pl.id}/songs?limit=20`);
+                    } else {
+                        throw new Error('No playlist found');
+                    }
+                })
+                .then(response => response.json())
+                .then(plData => {
+                    if (plData.success && plData.data && plData.data.songs) {
+                        playlist = plData.data.songs.map(song => ({
+                            title: song.name,
+                            artist: song.artists?.primary?.map(a => a.name).join(', ') || 'Unknown',
+                            duration: song.duration,
+                            image: song.image?.[2]?.url || 'https://via.placeholder.com/192',
+                            downloadUrl: song.downloadUrl,
+                            id: song.id,
+                            album: song.album
+                        }));
+                        sidebarTitle.textContent = `${pl.name || query} - Up Next`;
+                        renderPlaylist();
+                        loadSong(0);
+                    } else {
+                        // Fallback to dummy if API lacks playlist songs
+                        fallbackPlaylist(query);
+                    }
+                })
+                .catch(error => {
+                    console.error('Playlist fetch failed:', error);
+                    spinner.classList.add('hidden');
+                    fallbackPlaylist(query);
+                });
+        }
+
+        // Fallback for Featured (Original Dummy Logic)
+        function fallbackPlaylist(query) {
+            const dummySongs = [`${query} Song 1`, `${query} Song 2`, `${query} Song 3`];
+            playlist = dummySongs.map((title, i) => ({
                 title: title,
                 artist: `Artist ${i + 1}`,
                 duration: 180 + i * 30, // seconds
                 image: `https://via.placeholder.com/192?text=${title.substring(0, 1).toUpperCase()}`
             }));
+            sidebarTitle.textContent = `${query.charAt(0).toUpperCase() + query.slice(1)} Nights - Up Next`;
             renderPlaylist();
             loadSong(0);
         }
@@ -433,7 +511,71 @@
             });
         }
 
-        // Event listeners
+        // New: Load Sections via Nav (Fetches API Data Safely)
+        function loadSection(section) {
+            spinner.classList.remove('hidden');
+            resultsDiv.innerHTML = '';
+            let apiEndpoint = '';
+            switch (section) {
+                case 'home':
+                    apiEndpoint = '/api/trending?limit=20'; // Assume trending endpoint
+                    sidebarTitle.textContent = 'Trending - Up Next';
+                    break;
+                case 'browse':
+                    apiEndpoint = '/api/browse/categories?limit=10'; // Assume categories
+                    sidebarTitle.textContent = 'Browse - Up Next';
+                    break;
+                case 'library':
+                    apiEndpoint = '/api/library?limit=20'; // Assume user library
+                    sidebarTitle.textContent = 'Library - Up Next';
+                    break;
+                case 'playlists':
+                    apiEndpoint = '/api/playlists/featured?limit=10'; // Assume featured
+                    sidebarTitle.textContent = 'Playlists - Up Next';
+                    break;
+                default:
+                    apiEndpoint = '/api/search/songs?query=popular&limit=20';
+            }
+            fetch(`https://annonymous-sage.vercel.app${apiEndpoint}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    spinner.classList.add('hidden');
+                    if (data.success && data.data && (data.data.results || data.data.songs)) {
+                        const songs = data.data.results || data.data.songs;
+                        playlist = songs.map(song => ({
+                            title: song.name || song.title,
+                            artist: song.artists?.primary?.map(a => a.name).join(', ') || song.artist,
+                            duration: song.duration,
+                            image: song.image?.[2]?.url || song.image || 'https://via.placeholder.com/192',
+                            downloadUrl: song.downloadUrl,
+                            id: song.id,
+                            album: song.album
+                        }));
+                        renderPlaylist();
+                        if (playlist.length > 0) loadSong(0);
+                        displayResults(songs); // Reuse search display for section content
+                    } else {
+                        throw new Error('No data found');
+                    }
+                })
+                .catch(error => {
+                    console.error(`Section ${section} fetch failed:`, error);
+                    spinner.classList.add('hidden');
+                    fallbackToLocal(section);
+                });
+        }
+
+        // Fallback for Nav Sections
+        function fallbackToLocal(section) {
+            resultsDiv.innerHTML = `<p class="text-emerald-300 text-sm">Loading ${section}... Using local playlist.</p>`;
+            sidebarTitle.textContent = `${section.charAt(0).toUpperCase() + section.slice(1)} - Up Next`;
+            renderPlaylist();
+        }
+
+        // Event listeners (Unchanged Core)
         playBtn.addEventListener('click', togglePlay);
         nextBtn.addEventListener('click', nextSong);
         prevBtn.addEventListener('click', prevSong);
@@ -448,14 +590,27 @@
                 loadSong(0);
             }
         });
+        // Updated: Repeat with Modes
         repeatBtn.addEventListener('click', () => {
-            repeatBtn.style.color = repeatBtn.style.color === 'rgb(255, 255, 255)' ? '' : 'rgb(255, 255, 255)';
+            const mode = repeatBtn.dataset.mode;
+            if (!mode) {
+                repeatBtn.dataset.mode = 'single';
+                repeatBtn.style.color = 'rgb(255, 255, 255)';
+                repeatBtn.querySelector('.repeat-icon').innerHTML = '<path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4zM12 12h2v2h-2v-2z"/>';
+            } else if (mode === 'single') {
+                repeatBtn.dataset.mode = 'playlist';
+                repeatBtn.querySelector('.repeat-icon').innerHTML = '<path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>';
+            } else {
+                repeatBtn.dataset.mode = '';
+                repeatBtn.style.color = '';
+                repeatBtn.querySelector('.repeat-icon').innerHTML = '<path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>';
+            }
         });
         volumeControl.addEventListener('input', (e) => {
             player.volume = e.target.value;
         });
 
-        // Progress bar click
+        // Progress bar click (Unchanged)
         progressContainer.addEventListener('click', (e) => {
             const rect = progressContainer.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
@@ -468,7 +623,7 @@
             currentTimeEl.textContent = formatTime(currentTime);
         });
 
-        // Search functionality
+        // Search functionality (Unchanged)
         function searchSongs() {
             const query = searchInput.value.trim();
             if (!query) {
@@ -500,7 +655,7 @@
         }
 
         function displayResults(songs) {
-            resultsDiv.innerHTML = '';
+            resultsDiv.innerHTML = `<h4 class="text-white text-lg mb-2">Results:</h4>`;
             songs.forEach(song => {
                 const songDiv = document.createElement('div');
                 songDiv.className = 'song-item';
@@ -545,23 +700,32 @@
         searchButton.addEventListener('click', searchSongs);
         searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchSongs(); });
 
-        // Mobile menu toggle
+        // New: Mobile Menu Toggle
+        function toggleMobileNav() {
+            mobileNav.classList.toggle('open');
+        }
         menuToggle.addEventListener('click', () => {
             playlistSidebar.classList.toggle('hidden');
+            toggleMobileNav();
         });
 
-        // Initialize
-        renderPlaylist();
-        loadSong(0, true); // Skip auto-play on init
-        player.addEventListener('timeupdate', updateProgress);
+        // Updated: Ended Event with Repeat Modes
         player.addEventListener('ended', () => {
-            if (repeatBtn.style.color === 'rgb(255, 255, 255)') {
+            const mode = repeatBtn.dataset.mode;
+            if (mode === 'single') {
                 player.currentTime = 0;
                 player.play();
+            } else if (mode === 'playlist' && currentSongIndex === playlist.length - 1) {
+                loadSong(0); // Loop to start
             } else {
                 nextSong();
             }
         });
+
+        // Initialize (Unchanged)
+        renderPlaylist();
+        loadSong(0, true); // Skip auto-play on init
+        player.addEventListener('timeupdate', updateProgress);
     </script>
 </body>
 </html>
