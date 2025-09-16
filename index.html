@@ -111,7 +111,8 @@
 
         .mobile-nav {
             display: none;
-            flex-col space-y-4 p-4;
+            flex-direction: column;
+            space-y-4 p-4;
         }
         .mobile-nav.open {
             display: flex;
@@ -153,7 +154,6 @@
                         </svg>
                     </button>
                 </div>
-                <!-- Google Login Button -->
                 <div class="flex items-center space-x-4">
                     <button id="google-login-btn" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-full hover:bg-opacity-30 transition-all">
                         Sign In with Google
@@ -245,7 +245,7 @@
             <div class="glass-effect rounded-2xl p-6">
                 <h3 class="text-2xl font-bold text-white mb-6">Featured Playlists</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist('chill')">
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist('chill trending')">
                         <div class="flex items-center space-x-4">
                             <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
                                 <span class="text-2xl">🌙</span>
@@ -256,7 +256,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist('hot hits')">
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist('hot trending')">
                         <div class="flex items-center space-x-4">
                             <div class="w-16 h-16 bg-gradient-to-br from-pink-400 to-red-600 rounded-lg flex items-center justify-center">
                                 <span class="text-2xl">🔥</span>
@@ -290,14 +290,8 @@
         let currentTime = 0;
         let totalTime = 0;
         let currentSongIndex = 0;
-        let playlist = [
-            { title: "Midnight Dreams", artist: "Luna Eclipse", duration: 225, image: "https://via.placeholder.com/192" },
-            { title: "Stellar Journey", artist: "Cosmic Waves", duration: 252, image: "https://via.placeholder.com/192" },
-            { title: "Electric Pulse", artist: "Neon Nights", duration: 208, image: "https://via.placeholder.com/192" },
-            { title: "Ocean Breeze", artist: "Serene Sounds", duration: 303, image: "https://via.placeholder.com/192" },
-            { title: "Digital Dreams", artist: "Synth Masters", duration: 285, image: "https://via.placeholder.com/192" }
-        ];
-        let currentUser = null; // Google user data
+        let playlist = [];
+        let currentUser = null;
 
         const playBtn = document.getElementById('playBtn');
         const playIcon = document.getElementById('playIcon');
@@ -375,7 +369,7 @@
                 item.classList.toggle('bg-white', i === index);
                 item.classList.toggle('bg-opacity-20', i !== index);
             });
-            if (currentUser) saveLastPlayed(index); // Save history
+            if (currentUser) saveLastPlayed(index);
         }
 
         function playSong(song, skipPlay = false) {
@@ -425,25 +419,15 @@
 
         function playFeaturedPlaylist(query) {
             spinner.classList.remove('hidden');
-            fetch(`https://annonymous-sage.vercel.app/api/search/playlists?query=${encodeURIComponent(query)}&limit=1`)
+            fetch(`https://annonymous-sage.vercel.app/api/search/songs?query=${encodeURIComponent(query)}&limit=20`)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
                     spinner.classList.add('hidden');
-                    if (data.success && data.data && data.data.results && data.data.results[0]) {
-                        const pl = data.data.results[0];
-                        return fetch(`https://annonymous-sage.vercel.app/api/playlist/${pl.id}/songs?limit=20`);
-                    } else {
-                        throw new Error('No playlist found');
-                    }
-                })
-                .then(response => response.json())
-                .then(plData => {
-                    spinner.classList.add('hidden');
-                    if (plData.success && plData.data && plData.data.songs) {
-                        playlist = plData.data.songs.map(song => ({
+                    if (data.success && data.data && data.data.results) {
+                        playlist = data.data.results.map(song => ({
                             title: song.name,
                             artist: song.artists?.primary?.map(a => a.name).join(', ') || 'Unknown',
                             duration: song.duration,
@@ -460,7 +444,7 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Playlist fetch failed:', error);
+                    console.error('Featured fetch failed:', error);
                     spinner.classList.add('hidden');
                     fallbackPlaylist(query);
                 });
@@ -494,7 +478,7 @@
                     break;
                 case 'library':
                     if (currentUser) {
-                        loadUserHistory(); // Show liked songs
+                        loadUserHistory();
                         spinner.classList.add('hidden');
                         return;
                     }
@@ -568,13 +552,37 @@
 
         // Google Login
         function initGoogleSignIn() {
+            if (typeof gapi === 'undefined') {
+                console.error('gapi not loaded');
+                alert('Google API not loaded. Check console for details.');
+                return;
+            }
             gapi.load('auth2', () => {
                 gapi.auth2.init({
-                    client_id: 'YOUR_GOOGLE_CLIENT_ID' // Replace with your Google OAuth Client ID
+                    client_id: 'YOUR_GOOGLE_CLIENT_ID' // Replace with your actual Client ID
                 }).then(() => {
                     console.log('Google Auth initialized');
+                    checkSignedInStatus();
+                }).catch(error => {
+                    console.error('Init failed:', error);
+                    alert('Google Auth initialization failed. Replace CLIENT_ID in code.');
                 });
             });
+        }
+
+        function checkSignedInStatus() {
+            const authInstance = gapi.auth2.getAuthInstance();
+            if (authInstance.isSignedIn.get()) {
+                const profile = authInstance.currentUser.get().getBasicProfile();
+                currentUser = {
+                    id: profile.getId(),
+                    email: profile.getEmail(),
+                    name: profile.getName()
+                };
+                loginBtn.innerHTML = `<img src="${profile.getImageUrl()}" alt="User" class="w-6 h-6 rounded-full inline-block mr-2">Signed in as ${currentUser.email}`;
+                loginBtn.onclick = signOut;
+                loadUserHistory();
+            }
         }
 
         function signIn() {
@@ -592,7 +600,7 @@
                 console.log('Signed in:', currentUser);
             }).catch(error => {
                 console.error('Sign-in failed:', error);
-                alert('Sign-in failed. Try again.');
+                alert('Sign-in failed. Try again or check CLIENT_ID.');
             });
         }
 
@@ -604,6 +612,7 @@
                 loginBtn.onclick = signIn;
                 clearUserHistory();
                 console.log('Signed out');
+                fetchTrendingForInit(); // Reset to trending
             });
         }
 
@@ -614,16 +623,23 @@
             const lastPlayedStr = localStorage.getItem(`lastPlayed_${userId}`);
             const likedStr = localStorage.getItem(`liked_${userId}`);
 
+            if (likedStr) {
+                const likedIds = JSON.parse(likedStr);
+                const likedSongs = likedIds.map(id => {
+                    // Assume liked are saved songs; for simplicity, fetch or use stored
+                    // For now, filter from current playlist or default
+                    return playlist.find(song => (song.id || song.title) === id) || { title: 'Liked Song', artist: 'Unknown', duration: 180, image: 'https://via.placeholder.com/192' };
+                }).filter(Boolean);
+                if (likedSongs.length > 0) {
+                    playlist = likedSongs;
+                    sidebarTitle.textContent = 'My Library (Liked Songs)';
+                    renderLikedSongs(likedSongs);
+                }
+            }
+
             if (lastPlayedStr) {
                 const lastIndex = JSON.parse(lastPlayedStr);
                 if (playlist[lastIndex]) loadSong(lastIndex, true);
-            }
-
-            if (likedStr) {
-                const likedIds = JSON.parse(likedStr);
-                sidebarTitle.textContent = 'My Library (Liked Songs)';
-                const likedSongs = playlist.filter(song => likedIds.includes(song.id || song.title));
-                if (likedSongs.length > 0) renderLikedSongs(likedSongs);
             }
         }
 
@@ -649,12 +665,13 @@
                 element.innerHTML = '♥';
                 if (!playlist.some(p => (p.id || p.title) === songKey)) {
                     playlist.push(song);
-                    renderPlaylist();
                 }
             }
             localStorage.setItem(`liked_${userId}`, JSON.stringify(liked));
             if (sidebarTitle.textContent === 'My Library (Liked Songs)') {
                 renderLikedSongs(playlist.filter(s => liked.includes(s.id || s.title)));
+            } else {
+                renderPlaylist();
             }
         }
 
@@ -706,7 +723,6 @@
                         displayResults(data.data.results);
                     } else {
                         sidebarTitle.textContent = 'Search Results';
-                        resultsDiv.innerHTML = '<p class="text-emerald-300 text-sm">No results found or error in response.</p>';
                         displayLocalResults(query);
                     }
                 })
@@ -714,7 +730,6 @@
                     console.error('API Error:', error);
                     spinner.classList.add('hidden');
                     sidebarTitle.textContent = 'Search Results';
-                    resultsDiv.innerHTML = '<p class="text-emerald-300 text-sm">Error fetching results. Check local playlist or try again.</p>';
                     displayLocalResults(query);
                 });
         }
@@ -741,7 +756,7 @@
                     </div>
                 `;
                 songDiv.querySelector('.heart-icon').addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent song play on heart click
+                    e.stopPropagation();
                     toggleLike(song, e.target);
                 });
                 songDiv.addEventListener('click', () => {
@@ -850,12 +865,8 @@
         menuToggle.addEventListener('click', toggleMobileNav);
         loginBtn.addEventListener('click', () => {
             if (!currentUser) {
-                if (typeof gapi === 'undefined') {
-                    initGoogleSignIn();
-                    setTimeout(signIn, 1000);
-                } else {
-                    signIn();
-                }
+                initGoogleSignIn();
+                setTimeout(signIn, 1000);
             } else {
                 signOut();
             }
@@ -881,13 +892,46 @@
             const script2 = document.createElement('script');
             script2.src = 'https://accounts.google.com/gsi/client';
             script2.async = true;
+            script2.onload = initGoogleSignIn;
             document.head.appendChild(script2);
         };
         document.head.appendChild(script1);
 
+        // Initial Fetch for Trending Up Next
+        function fetchTrendingForInit() {
+            fetch(`https://annonymous-sage.vercel.app/api/trending?limit=20`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data && data.data.results) {
+                        playlist = data.data.results.map(song => ({
+                            title: song.name,
+                            artist: song.artists.primary.map(a => a.name).join(', '),
+                            duration: song.duration,
+                            image: song.image[2]?.url,
+                            downloadUrl: song.downloadUrl,
+                            id: song.id,
+                            album: song.album
+                        }));
+                        renderPlaylist();
+                        loadSong(0, true);
+                    }
+                })
+                .catch(() => {
+                    // Hardcoded fallback
+                    playlist = [
+                        { title: "Midnight Dreams", artist: "Luna Eclipse", duration: 225, image: "https://via.placeholder.com/192" },
+                        { title: "Stellar Journey", artist: "Cosmic Waves", duration: 252, image: "https://via.placeholder.com/192" },
+                        { title: "Electric Pulse", artist: "Neon Nights", duration: 208, image: "https://via.placeholder.com/192" },
+                        { title: "Ocean Breeze", artist: "Serene Sounds", duration: 303, image: "https://via.placeholder.com/192" },
+                        { title: "Digital Dreams", artist: "Synth Masters", duration: 285, image: "https://via.placeholder.com/192" }
+                    ];
+                    renderPlaylist();
+                    loadSong(0, true);
+                });
+        }
+
         // Initialize
-        renderPlaylist();
-        loadSong(0, true);
+        fetchTrendingForInit();
     </script>
 </body>
 </html>
