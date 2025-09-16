@@ -267,11 +267,11 @@
         let totalTime = 0;
         let currentSongIndex = 0;
         let playlist = [
-            { title: "Midnight Dreams", artist: "Luna Eclipse", duration: 225000, emoji: "🎶", image: "https://via.placeholder.com/192" },
-            { title: "Stellar Journey", artist: "Cosmic Waves", duration: 252000, emoji: "⭐", image: "https://via.placeholder.com/192" },
-            { title: "Electric Pulse", artist: "Neon Nights", duration: 208000, emoji: "⚡", image: "https://via.placeholder.com/192" },
-            { title: "Ocean Breeze", artist: "Serene Sounds", duration: 303000, emoji: "🌊", image: "https://via.placeholder.com/192" },
-            { title: "Digital Dreams", artist: "Synth Masters", duration: 285000, emoji: "💫", image: "https://via.placeholder.com/192" }
+            { title: "Midnight Dreams", artist: "Luna Eclipse", duration: 225000, image: "https://via.placeholder.com/192" },
+            { title: "Stellar Journey", artist: "Cosmic Waves", duration: 252000, image: "https://via.placeholder.com/192" },
+            { title: "Electric Pulse", artist: "Neon Nights", duration: 208000, image: "https://via.placeholder.com/192" },
+            { title: "Ocean Breeze", artist: "Serene Sounds", duration: 303000, image: "https://via.placeholder.com/192" },
+            { title: "Digital Dreams", artist: "Synth Masters", duration: 285000, image: "https://via.placeholder.com/192" }
         ];
 
         const playBtn = document.getElementById('playBtn');
@@ -314,7 +314,7 @@
             if (player.readyState > 0) {
                 currentTime = player.currentTime;
                 totalTime = player.duration || totalTime;
-                const progress = (currentTime / totalTime) * 100;
+                const progress = (currentTime / totalTime) * 100 || 0;
                 progressBar.style.width = `${progress}%`;
                 currentTimeEl.textContent = formatTime(currentTime);
                 totalTimeEl.textContent = formatTime(totalTime);
@@ -329,8 +329,13 @@
                 albumArt.classList.add('playing');
                 waveAnimation.classList.add('playing');
                 player.play().catch(error => {
-                    console.error('Error playing audio:', error);
-                    alert('Unable to play the song. It might be restricted or the link expired.');
+                    console.error('Playback failed:', error);
+                    alert('Playback failed. Check console for details or try another song.');
+                    isPlaying = false;
+                    playIcon.classList.remove('hidden');
+                    pauseIcon.classList.add('hidden');
+                    albumArt.classList.remove('playing');
+                    waveAnimation.classList.remove('playing');
                 });
             } else {
                 playIcon.classList.remove('hidden');
@@ -388,7 +393,11 @@
                 currentTimeEl.textContent = '0:00';
                 if (!isPlaying) togglePlay();
             } else {
-                alert('No download URL available for this song.');
+                console.error('No valid download URL found:', song);
+                alert('No playable URL available. Using fallback or try another song.');
+                player.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // Fallback audio
+                totalTime = 180; // Approx 3 min fallback
+                if (!isPlaying) togglePlay();
             }
         }
 
@@ -476,7 +485,7 @@
             resultsDiv.innerHTML = '';
             fetch(`https://annonymous-sage.vercel.app/api/search/songs?query=${encodeURIComponent(query)}&limit=20`)
                 .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
+                    if (!response.ok) throw new Error('Network response was not ok: ' + response.statusText);
                     return response.json();
                 })
                 .then(data => {
@@ -489,9 +498,9 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error fetching data:', error);
+                    console.error('API Error:', error);
                     spinner.classList.add('hidden');
-                    resultsDiv.innerHTML = '<p class="text-emerald-300 text-sm">Error fetching results. Try again or check local playlist.</p>';
+                    resultsDiv.innerHTML = '<p class="text-emerald-300 text-sm">Error fetching results. Check local playlist or try again.</p>';
                     displayLocalResults(query);
                 });
         }
@@ -507,7 +516,7 @@
                 `;
                 songDiv.onclick = () => {
                     playSong(song);
-                    playlist.push(song); // Add to playlist
+                    playlist.push(song);
                     renderPlaylist();
                 };
                 resultsDiv.appendChild(songDiv);
