@@ -10,6 +10,8 @@
        
         body {
             font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
         }
        
         .gradient-bg {
@@ -29,6 +31,10 @@
         .album-art {
             animation: rotate 20s linear infinite;
             animation-play-state: paused;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
         }
        
         .album-art.playing {
@@ -44,6 +50,12 @@
             display: flex;
             align-items: center;
             gap: 2px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+       
+        .wave-animation.playing {
+            opacity: 1;
         }
        
         .wave-bar {
@@ -77,11 +89,30 @@
         .song-item:hover {
             background-color: rgba(255, 255, 255, 0.08);
         }
+       
+        #player {
+            display: none;
+        }
+       
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #34d399;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+       
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen">
     <!-- Header -->
-    <header class="glass-effect p-6">
+    <header class="glass-effect p-6 fixed w-full z-10">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
@@ -89,7 +120,7 @@
                 </div>
                 <h1 class="text-white text-2xl font-bold">MusicPioneer</h1>
             </div>
-            <div class="hidden md:flex items-center space-x-6">
+            <div class="flex items-center space-x-6">
                 <nav class="flex space-x-8">
                     <a href="#" class="text-white hover:text-emerald-300 transition-colors">Home</a>
                     <a href="#" class="text-white hover:text-emerald-300 transition-colors">Browse</a>
@@ -97,22 +128,22 @@
                     <a href="#" class="text-white hover:text-emerald-300 transition-colors">Playlists</a>
                 </nav>
                 <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Search songs, artists..." class="bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 px-4 py-2 pr-10 rounded-full focus:outline-none focus:bg-opacity-30 transition-all w-64">
-                    <button id="searchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-emerald-300 transition-colors">
+                    <input type="text" id="search-input" placeholder="Search songs, artists..." class="bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 px-4 py-2 pr-10 rounded-full focus:outline-none focus:bg-opacity-30 transition-all w-64 md:w-64">
+                    <button id="search-button" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-emerald-300 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </button>
                 </div>
             </div>
-            <button class="md:hidden text-white">
+            <button id="menu-toggle" class="md:hidden text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
         </div>
     </header>
-    <div class="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="max-w-6xl mx-auto p-6 pt-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Player -->
         <div class="lg:col-span-2">
             <div class="glass-effect rounded-2xl p-8 mb-8">
@@ -122,7 +153,7 @@
                         <div id="albumArt" class="album-art w-48 h-48 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-2xl">
                             <span class="text-6xl">🎶</span>
                         </div>
-                        <div id="waveAnimation" class="wave-animation absolute -bottom-4 left-1/2 transform -translate-x-1/2 opacity-0">
+                        <div id="waveAnimation" class="wave-animation absolute -bottom-4 left-1/2 transform -translate-x-1/2">
                             <div class="wave-bar"></div>
                             <div class="wave-bar"></div>
                             <div class="wave-bar"></div>
@@ -149,18 +180,18 @@
                         </div>
                        
                         <!-- Controls -->
-                        <div class="flex items-center justify-center space-x-6 mt-8">
-                            <button id="shuffleBtn" class="text-emerald-300 hover:text-white transition-colors">
+                        <div class="flex items-center justify-center flex-wrap space-x-4 mt-8">
+                            <button id="shuffleBtn" class="text-emerald-300 hover:text-white transition-colors p-3" aria-label="Shuffle">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
                                 </svg>
                             </button>
-                            <button id="prevBtn" class="text-white hover:text-emerald-300 transition-colors">
+                            <button id="prevBtn" class="text-white hover:text-emerald-300 transition-colors p-3" aria-label="Previous">
                                 <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
                                 </svg>
                             </button>
-                            <button id="playBtn" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full p-4 hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-lg">
+                            <button id="playBtn" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full p-5 hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-lg" aria-label="Play/Pause">
                                 <svg id="playIcon" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M8 5v14l11-7z"/>
                                 </svg>
@@ -168,16 +199,17 @@
                                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                                 </svg>
                             </button>
-                            <button id="nextBtn" class="text-white hover:text-emerald-300 transition-colors">
+                            <button id="nextBtn" class="text-white hover:text-emerald-300 transition-colors p-3" aria-label="Next">
                                 <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
                                 </svg>
                             </button>
-                            <button id="repeatBtn" class="text-emerald-300 hover:text-white transition-colors">
+                            <button id="repeatBtn" class="text-emerald-300 hover:text-white transition-colors p-3" aria-label="Repeat">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
                                 </svg>
                             </button>
+                            <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="1" class="w-20 h-2 bg-white bg-opacity-20 rounded-full appearance-none cursor-pointer" aria-label="Volume">
                         </div>
                     </div>
                 </div>
@@ -187,7 +219,7 @@
             <div class="glass-effect rounded-2xl p-6">
                 <h3 class="text-2xl font-bold text-white mb-6">Featured Playlists</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer">
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist(['Chill Nights Song 1', 'Chill Nights Song 2'])">
                         <div class="flex items-center space-x-4">
                             <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
                                 <span class="text-2xl">🌙</span>
@@ -198,7 +230,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer">
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist(['Hot Hits Song 1', 'Hot Hits Song 2'])">
                         <div class="flex items-center space-x-4">
                             <div class="w-16 h-16 bg-gradient-to-br from-pink-400 to-red-600 rounded-lg flex items-center justify-center">
                                 <span class="text-2xl">🔥</span>
@@ -215,99 +247,31 @@
             <!-- Search Results -->
             <div class="glass-effect rounded-2xl p-6 mt-8">
                 <div id="results"></div>
+                <div id="spinner" class="spinner hidden"></div>
             </div>
         </div>
        
         <!-- Playlist Sidebar -->
-        <div class="glass-effect rounded-2xl p-6">
+        <div id="playlist-sidebar" class="glass-effect rounded-2xl p-6 lg:block hidden">
             <h3 class="text-2xl font-bold text-white mb-6">Up Next</h3>
-            <div id="playlist-items" class="space-y-3">
-                <div class="playlist-item p-3 rounded-lg cursor-pointer transition-all" data-song="Midnight Dreams" data-artist="Luna Eclipse" data-duration="3:45">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-600 rounded-lg flex items-center justify-center">
-                            <span class="text-lg">🎶</span>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-white font-medium">Midnight Dreams</h4>
-                            <p class="text-emerald-300 text-sm">Luna Eclipse</p>
-                        </div>
-                        <span class="text-emerald-300 text-sm">3:45</span>
-                    </div>
-                </div>
-                <div class="playlist-item p-3 rounded-lg cursor-pointer transition-all" data-song="Stellar Journey" data-artist="Cosmic Waves" data-duration="4:12">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-600 rounded-lg flex items-center justify-center">
-                            <span class="text-lg">⭐</span>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-white font-medium">Stellar Journey</h4>
-                            <p class="text-emerald-300 text-sm">Cosmic Waves</p>
-                        </div>
-                        <span class="text-emerald-300 text-sm">4:12</span>
-                    </div>
-                </div>
-                <div class="playlist-item p-3 rounded-lg cursor-pointer transition-all" data-song="Electric Pulse" data-artist="Neon Nights" data-duration="3:28">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-lg flex items-center justify-center">
-                            <span class="text-lg">⚡</span>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-white font-medium">Electric Pulse</h4>
-                            <p class="text-emerald-300 text-sm">Neon Nights</p>
-                        </div>
-                        <span class="text-emerald-300 text-sm">3:28</span>
-                    </div>
-                </div>
-                <div class="playlist-item p-3 rounded-lg cursor-pointer transition-all" data-song="Ocean Breeze" data-artist="Serene Sounds" data-duration="5:03">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-br from-teal-400 to-blue-600 rounded-lg flex items-center justify-center">
-                            <span class="text-lg">🌊</span>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-white font-medium">Ocean Breeze</h4>
-                            <p class="text-emerald-300 text-sm">Serene Sounds</p>
-                        </div>
-                        <span class="text-emerald-300 text-sm">5:03</span>
-                    </div>
-                </div>
-                <div class="playlist-item p-3 rounded-lg cursor-pointer transition-all" data-song="Digital Dreams" data-artist="Synth Masters" data-duration="4:45">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-indigo-600 rounded-lg flex items-center justify-center">
-                            <span class="text-lg">💫</span>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-white font-medium">Digital Dreams</h4>
-                            <p class="text-emerald-300 text-sm">Synth Masters</p>
-                        </div>
-                        <span class="text-emerald-300 text-sm">4:45</span>
-                    </div>
-                </div>
-            </div>
+            <div id="playlist-items" class="space-y-3"></div>
         </div>
     </div>
 
-    <!-- Audio Player -->
-    <div id="player-container" class="flex items-center gap-4 max-w-6xl mx-auto px-4 mt-4 hidden">
-        <img id="player-art" src="https://via.placeholder.com/50" alt="Now Playing" class="w-12 h-12 object-cover rounded">
-        <div class="flex-1">
-            <p id="player-title" class="text-sm font-semibold text-white">No song playing</p>
-            <p id="player-artist" class="text-xs text-emerald-300">Select a song to play</p>
-        </div>
-        <audio id="player" controls class="flex-1"></audio>
-    </div>
+    <!-- Audio Player (Custom Controlled) -->
+    <audio id="player"></audio>
 
     <script>
         let isPlaying = false;
         let currentTime = 0;
         let totalTime = 0;
-        let progressInterval;
         let currentSongIndex = 0;
         let playlist = [
-            { title: "Midnight Dreams", artist: "Luna Eclipse", duration: 225000, emoji: "🎶" },
-            { title: "Stellar Journey", artist: "Cosmic Waves", duration: 252000, emoji: "⭐" },
-            { title: "Electric Pulse", artist: "Neon Nights", duration: 208000, emoji: "⚡" },
-            { title: "Ocean Breeze", artist: "Serene Sounds", duration: 303000, emoji: "🌊" },
-            { title: "Digital Dreams", artist: "Synth Masters", duration: 285000, emoji: "💫" }
+            { title: "Midnight Dreams", artist: "Luna Eclipse", duration: 225000, emoji: "🎶", image: "https://via.placeholder.com/192" },
+            { title: "Stellar Journey", artist: "Cosmic Waves", duration: 252000, emoji: "⭐", image: "https://via.placeholder.com/192" },
+            { title: "Electric Pulse", artist: "Neon Nights", duration: 208000, emoji: "⚡", image: "https://via.placeholder.com/192" },
+            { title: "Ocean Breeze", artist: "Serene Sounds", duration: 303000, emoji: "🌊", image: "https://via.placeholder.com/192" },
+            { title: "Digital Dreams", artist: "Synth Masters", duration: 285000, emoji: "💫", image: "https://via.placeholder.com/192" }
         ];
 
         const playBtn = document.getElementById('playBtn');
@@ -327,14 +291,14 @@
         const shuffleBtn = document.getElementById('shuffleBtn');
         const repeatBtn = document.getElementById('repeatBtn');
         const player = document.getElementById('player');
-        const playerArt = document.getElementById('player-art');
-        const playerTitleEl = document.getElementById('player-title');
-        const playerArtistEl = document.getElementById('player-artist');
-        const playerContainer = document.getElementById('player-container');
-        const searchInput = document.getElementById('searchInput');
-        const searchBtn = document.getElementById('searchBtn');
+        const volumeControl = document.getElementById('volumeControl');
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
         const resultsDiv = document.getElementById('results');
-        const playlistItems = document.querySelectorAll('.playlist-item');
+        const spinner = document.getElementById('spinner');
+        const playlistItemsDiv = document.getElementById('playlist-items');
+        const playlistSidebar = document.getElementById('playlist-sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
 
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
@@ -347,14 +311,13 @@
         }
 
         function updateProgress() {
-            if (isPlaying && player.readyState > 0) {
+            if (player.readyState > 0) {
                 currentTime = player.currentTime;
+                totalTime = player.duration || totalTime;
                 const progress = (currentTime / totalTime) * 100;
                 progressBar.style.width = `${progress}%`;
                 currentTimeEl.textContent = formatTime(currentTime);
-                if (currentTime >= totalTime) {
-                    nextSong();
-                }
+                totalTimeEl.textContent = formatTime(totalTime);
             }
         }
 
@@ -364,19 +327,17 @@
                 playIcon.classList.add('hidden');
                 pauseIcon.classList.remove('hidden');
                 albumArt.classList.add('playing');
-                waveAnimation.style.opacity = '1';
+                waveAnimation.classList.add('playing');
                 player.play().catch(error => {
                     console.error('Error playing audio:', error);
                     alert('Unable to play the song. It might be restricted or the link expired.');
                 });
-                progressInterval = setInterval(updateProgress, 100);
             } else {
                 playIcon.classList.remove('hidden');
                 pauseIcon.classList.add('hidden');
                 albumArt.classList.remove('playing');
-                waveAnimation.style.opacity = '0';
+                waveAnimation.classList.remove('playing');
                 player.pause();
-                clearInterval(progressInterval);
             }
         }
 
@@ -386,49 +347,42 @@
             songTitle.textContent = song.title;
             artistName.textContent = song.artist;
             albumName.textContent = `N/A • ${new Date().getFullYear()}`;
-            albumArt.innerHTML = `<span class="text-6xl">${song.emoji}</span>`;
-            totalTime = song.duration / 1000; // Convert ms to seconds
-            totalTimeEl.textContent = formatDuration(song.duration);
+            albumArt.innerHTML = `<img src="${song.image}" class="w-full h-full object-cover rounded-full">`;
+            totalTime = song.duration / 1000;
             currentTime = 0;
             progressBar.style.width = '0%';
             currentTimeEl.textContent = '0:00';
+            totalTimeEl.textContent = formatDuration(song.duration);
 
             // Update playlist highlighting
-            playlistItems.forEach((item, i) => {
-                if (i === index) {
-                    item.style.background = 'rgba(255, 255, 255, 0.2)';
-                } else {
-                    item.style.background = 'transparent';
-                }
+            document.querySelectorAll('.playlist-item').forEach((item, i) => {
+                item.classList.toggle('bg-opacity-20', i === index);
             });
         }
 
         function nextSong() {
             currentSongIndex = (currentSongIndex + 1) % playlist.length;
-            loadSong(currentSongIndex);
-            if (isPlaying && player.src) togglePlay();
+            playSong(playlist[currentSongIndex]);
         }
 
         function prevSong() {
             currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
-            loadSong(currentSongIndex);
-            if (isPlaying && player.src) togglePlay();
+            playSong(playlist[currentSongIndex]);
         }
 
         function playSong(song) {
+            playerArt.src = song.image && song.image[2]?.url ? song.image[2].url : 'https://via.placeholder.com/50';
+            playerTitleEl.textContent = song.name || song.title;
+            playerArtistEl.textContent = song.artists?.primary?.map(a => a.name).join(', ') || song.artist;
+            songTitle.textContent = song.name || song.title;
+            artistName.textContent = song.artists?.primary?.map(a => a.name).join(', ') || song.artist;
+            albumName.textContent = `Album: ${song.album?.name || 'N/A'} • ${new Date().getFullYear()}`;
+            albumArt.innerHTML = `<img src="${song.image && song.image[2]?.url || song.image || 'https://via.placeholder.com/192'}" class="w-full h-full object-cover rounded-full">`;
             const downloadUrls = song.downloadUrl || [];
             const highestQualityUrl = downloadUrls.length > 0 ? downloadUrls[downloadUrls.length - 1].url : null;
             if (highestQualityUrl) {
                 player.src = highestQualityUrl;
-                playerArt.src = 'https://via.placeholder.com/50'; // Placeholder, update with song.image if available
-                playerTitleEl.textContent = song.title;
-                playerArtistEl.textContent = song.artist;
-                playerContainer.classList.remove('hidden');
-                songTitle.textContent = song.title;
-                artistName.textContent = song.artist;
-                albumName.textContent = `N/A • ${new Date().getFullYear()}`;
-                totalTime = song.duration / 1000;
-                totalTimeEl.textContent = formatDuration(song.duration);
+                totalTime = song.duration / 1000 || 0;
                 currentTime = 0;
                 progressBar.style.width = '0%';
                 currentTimeEl.textContent = '0:00';
@@ -438,6 +392,44 @@
             }
         }
 
+        function playFeaturedPlaylist(songs) {
+            playlist = songs.map((title, i) => ({
+                title: title,
+                artist: `Artist ${i + 1}`,
+                duration: 180000 + i * 30000,
+                image: `https://via.placeholder.com/192?text=${title}`
+            }));
+            renderPlaylist();
+            loadSong(0);
+            if (!isPlaying) togglePlay();
+        }
+
+        function renderPlaylist() {
+            playlistItemsDiv.innerHTML = '';
+            playlist.forEach((song, index) => {
+                const div = document.createElement('div');
+                div.className = 'playlist-item p-3 rounded-lg cursor-pointer transition-all';
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-600 rounded-lg flex items-center justify-center">
+                            <span class="text-lg">${song.emoji || '🎶'}</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-white font-medium">${song.title}</h4>
+                            <p class="text-emerald-300 text-sm">${song.artist}</p>
+                        </div>
+                        <span class="text-emerald-300 text-sm">${formatDuration(song.duration)}</span>
+                    </div>
+                `;
+                div.addEventListener('click', () => {
+                    loadSong(index);
+                    playSong(playlist[index]);
+                    if (!isPlaying) togglePlay();
+                });
+                playlistItemsDiv.appendChild(div);
+            });
+        }
+
         // Event listeners
         playBtn.addEventListener('click', togglePlay);
         nextBtn.addEventListener('click', nextSong);
@@ -445,16 +437,19 @@
         shuffleBtn.addEventListener('click', () => {
             shuffleBtn.style.color = shuffleBtn.style.color === 'rgb(255, 255, 255)' ? '' : 'rgb(255, 255, 255)';
             if (shuffleBtn.style.color === 'rgb(255, 255, 255)') {
-                // Shuffle playlist
                 for (let i = playlist.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
                 }
-                loadSong(0); // Reload first song after shuffle
+                renderPlaylist();
+                loadSong(0);
             }
         });
         repeatBtn.addEventListener('click', () => {
             repeatBtn.style.color = repeatBtn.style.color === 'rgb(255, 255, 255)' ? '' : 'rgb(255, 255, 255)';
+        });
+        volumeControl.addEventListener('input', (e) => {
+            player.volume = e.target.value;
         });
 
         // Progress bar click
@@ -470,55 +465,34 @@
             currentTimeEl.textContent = formatTime(currentTime);
         });
 
-        // Playlist item clicks
-        playlistItems.forEach((item, index) => {
-            item.addEventListener('click', () => {
-                loadSong(index);
-                if (!isPlaying) togglePlay();
-            });
-        });
-
         // Search functionality
-        function performSearch() {
-            const query = searchInput.value.toLowerCase().trim();
-            const playlistItems = document.querySelectorAll('.playlist-item');
-
-            if (query === '') {
-                playlistItems.forEach(item => {
-                    item.style.display = 'block';
-                });
-                resultsDiv.innerHTML = '';
+        function searchSongs() {
+            const query = searchInput.value.trim();
+            if (!query) {
+                alert('Please enter a search query.');
                 return;
             }
-
-            playlistItems.forEach(item => {
-                const songTitle = item.dataset.song.toLowerCase();
-                const artistName = item.dataset.artist.toLowerCase();
-                if (songTitle.includes(query) || artistName.includes(query)) {
-                    item.style.display = 'block';
-                    item.style.background = 'rgba(255, 255, 255, 0.15)';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-
-            // API search
-            const apiUrl = `https://annonymous-sage.vercel.app/api/search/songs?query=${encodeURIComponent(query)}&limit=20`;
-            fetch(apiUrl)
+            spinner.classList.remove('hidden');
+            resultsDiv.innerHTML = '';
+            fetch(`https://annonymous-sage.vercel.app/api/search/songs?query=${encodeURIComponent(query)}&limit=20`)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
+                    spinner.classList.add('hidden');
                     if (data.success && data.data && data.data.results) {
                         displayResults(data.data.results);
                     } else {
                         resultsDiv.innerHTML = '<p class="text-emerald-300 text-sm">No results found or error in response.</p>';
+                        displayLocalResults(query);
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
-                    resultsDiv.innerHTML = '<p class="text-emerald-300 text-sm">Error fetching results. Please try again.</p>';
+                    spinner.classList.add('hidden');
+                    resultsDiv.innerHTML = '<p class="text-emerald-300 text-sm">Error fetching results. Try again or check local playlist.</p>';
+                    displayLocalResults(query);
                 });
         }
 
@@ -531,17 +505,60 @@
                     <strong class="text-white">${song.name}</strong> - ${song.artists.primary.map(artist => artist.name).join(', ')}<br>
                     Album: ${song.album.name} | Duration: ${formatDuration(song.duration)} | Language: ${song.language}
                 `;
-                songDiv.onclick = () => playSong({ title: song.name, artist: song.artists.primary.map(a => a.name).join(', '), duration: song.duration, downloadUrl: song.downloadUrl });
+                songDiv.onclick = () => {
+                    playSong(song);
+                    playlist.push(song); // Add to playlist
+                    renderPlaylist();
+                };
                 resultsDiv.appendChild(songDiv);
             });
         }
 
-        searchBtn.addEventListener('click', performSearch);
-        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
-        searchInput.addEventListener('input', () => { if (searchInput.value === '') performSearch(); });
+        function displayLocalResults(query) {
+            const filtered = playlist.filter(song =>
+                song.title.toLowerCase().includes(query.toLowerCase()) ||
+                song.artist.toLowerCase().includes(query.toLowerCase())
+            );
+            if (filtered.length > 0) {
+                resultsDiv.innerHTML = '<h4 class="text-white text-lg mb-2">Local Matches:</h4>';
+                filtered.forEach(song => {
+                    const songDiv = document.createElement('div');
+                    songDiv.className = 'song-item';
+                    songDiv.innerHTML = `
+                        <strong class="text-white">${song.title}</strong> - ${song.artist}<br>
+                        Duration: ${formatDuration(song.duration)}
+                    `;
+                    songDiv.onclick = () => {
+                        const index = playlist.findIndex(s => s.title === song.title);
+                        loadSong(index);
+                        playSong(playlist[index]);
+                        if (!isPlaying) togglePlay();
+                    };
+                    resultsDiv.appendChild(songDiv);
+                });
+            }
+        }
+
+        searchButton.addEventListener('click', searchSongs);
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchSongs(); });
+
+        // Mobile menu toggle
+        menuToggle.addEventListener('click', () => {
+            playlistSidebar.classList.toggle('hidden');
+        });
 
         // Initialize
+        renderPlaylist();
         loadSong(0);
+        player.addEventListener('timeupdate', updateProgress);
+        player.addEventListener('ended', () => {
+            if (repeatBtn.style.color === 'rgb(255, 255, 255)') {
+                player.currentTime = 0;
+                player.play();
+            } else {
+                nextSong();
+            }
+        });
     </script>
 </body>
 </html>
