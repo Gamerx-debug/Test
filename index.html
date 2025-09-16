@@ -130,28 +130,13 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Spotify-inspired search styles */
-        .search-container {
-            transition: all 0.3s ease;
-        }
-        .search-results {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-        .search-results.open {
-            max-height: 800px;
-        }
+        /* MedPlay-like search result styles */
         .search-result-row {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1rem;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            transition: background 0.2s;
-        }
-        .search-result-row:hover {
-            background: rgba(255, 255, 255, 0.05);
         }
         .search-result-art {
             width: 3rem;
@@ -178,11 +163,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .search-result-duration {
-            color: #10b981;
-            font-size: 0.875rem;
-            margin-left: auto;
-        }
         .search-result-actions {
             display: flex;
             align-items: center;
@@ -202,52 +182,6 @@
             opacity: 1;
         }
         .heart-filled { color: #ef4444; }
-
-        /* Sidebar pop-up on play */
-        .player-sidebar {
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            position: fixed;
-            top: 0;
-            right: 0;
-            height: 100%;
-            width: 20rem;
-            z-index: 20;
-        }
-        .player-sidebar.open {
-            transform: translateX(0);
-        }
-        .main-content {
-            transition: margin-right 0.3s ease;
-        }
-        .main-content.shifted {
-            margin-right: 20rem;
-        }
-
-        /* Full-width trending on load */
-        .trending-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        .trending-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .trending-card:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .trending-art {
-            width: 100%;
-            height: 150px;
-            border-radius: 0.5rem;
-            object-fit: cover;
-            margin-bottom: 0.5rem;
-        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen">
@@ -267,7 +201,7 @@
                     <a href="#" class="nav-link text-white hover:text-emerald-300 transition-colors" onclick="loadSection('library')">Library</a>
                     <a href="#" class="nav-link text-white hover:text-emerald-300 transition-colors" onclick="loadSection('playlists')">Playlists</a>
                 </nav>
-                <div class="relative search-container">
+                <div class="relative">
                     <input type="text" id="search-input" placeholder="Search songs, artists..." class="bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 px-4 py-2 pr-10 rounded-full focus:outline-none focus:bg-opacity-30 transition-all w-64 md:w-64">
                     <button id="search-button" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-emerald-300 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,73 +227,113 @@
                 <a href="#" class="nav-link" onclick="loadSection('playlists'); toggleMobileNav();">Playlists</a>
             </div>
         </div>
-        <!-- Spotify-like Search Results Below Header -->
-        <div id="search-results-container" class="search-results glass-effect max-w-6xl mx-auto mt-2 p-4 hidden">
-            <div id="search-results-list"></div>
-        </div>
     </header>
-    <div class="main-content max-w-6xl mx-auto p-6 pt-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Main Content (Trending Grid on Load) -->
-        <div class="lg:col-span-3">
-            <div id="trending-container" class="glass-effect rounded-2xl p-6">
-                <h3 class="text-2xl font-bold text-white mb-6">Trending Songs</h3>
-                <div id="trending-grid" class="trending-grid"></div>
+    <div class="max-w-6xl mx-auto p-6 pt-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+            <div class="glass-effect rounded-2xl p-8 mb-8">
+                <div class="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
+                    <!-- Album Art -->
+                    <div class="relative">
+                        <div id="albumArt" class="album-art w-48 h-48 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-2xl">
+                            <span class="text-6xl">🎶</span>
+                        </div>
+                        <div id="waveAnimation" class="wave-animation absolute -bottom-4 left-1/2 transform -translate-x-1/2">
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                        </div>
+                    </div>
+                    <!-- Song Info -->
+                    <div class="flex-1 text-center md:text-left">
+                        <h2 id="songTitle" class="text-3xl font-bold text-white mb-2">No Song Playing</h2>
+                        <p id="artistName" class="text-xl text-emerald-300 mb-4">Select a Song</p>
+                        <p id="albumName" class="text-emerald-400">N/A</p>
+                        <!-- Progress Bar -->
+                        <div class="mt-6">
+                            <div class="flex justify-between text-sm text-emerald-300 mb-2">
+                                <span id="currentTime">0:00</span>
+                                <span id="totalTime">0:00</span>
+                            </div>
+                            <div class="w-full bg-white bg-opacity-20 rounded-full h-2 cursor-pointer" id="progressContainer">
+                                <div id="progressBar" class="progress-bar bg-white h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <!-- Controls -->
+                        <div class="flex items-center justify-center flex-wrap space-x-4 mt-8">
+                            <button id="shuffleBtn" class="text-emerald-300 hover:text-white transition-colors p-3" aria-label="Shuffle">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+                                </svg>
+                            </button>
+                            <button id="prevBtn" class="text-white hover:text-emerald-300 transition-colors p-3" aria-label="Previous">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                                </svg>
+                            </button>
+                            <button id="playBtn" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full p-5 hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-lg" aria-label="Play/Pause">
+                                <svg id="playIcon" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                <svg id="pauseIcon" class="w-8 h-8 hidden" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                                </svg>
+                            </button>
+                            <button id="nextBtn" class="text-white hover:text-emerald-300 transition-colors p-3" aria-label="Next">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                                </svg>
+                            </button>
+                            <button id="repeatBtn" class="text-emerald-300 hover:text-white transition-colors p-3" aria-label="Repeat" data-mode="">
+                                <svg class="w-6 h-6 repeat-icon" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+                                </svg>
+                            </button>
+                            <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="1" class="w-20 h-2 bg-white bg-opacity-20 rounded-full appearance-none cursor-pointer" aria-label="Volume">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Featured Playlists -->
+            <div class="glass-effect rounded-2xl p-6">
+                <h3 class="text-2xl font-bold text-white mb-6">Featured Playlists</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist('chill trending')">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
+                                <span class="text-2xl">🌙</span>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-semibold">Chill Nights</h4>
+                                <p class="text-emerald-300 text-sm">24 songs • 1h 32m</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-20 transition-all cursor-pointer" onclick="playFeaturedPlaylist('hot trending')">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-pink-400 to-red-600 rounded-lg flex items-center justify-center">
+                                <span class="text-2xl">🔥</span>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-semibold">Hot Hits</h4>
+                                <p class="text-emerald-300 text-sm">50 songs • 3h 15m</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Search Results (Hidden; Now in Sidebar) -->
+            <div class="glass-effect rounded-2xl p-6 mt-8 hidden">
+                <div id="results"></div>
+                <div id="spinner" class="spinner hidden"></div>
             </div>
         </div>
-        <!-- Player Sidebar (Hidden Initially) -->
-        <div id="player-sidebar" class="player-sidebar glass-effect p-6 hidden lg:block">
-            <div class="flex flex-col items-center space-y-6">
-                <!-- Album Art -->
-                <div class="relative">
-                    <div id="sidebar-albumArt" class="album-art w-40 h-40 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-2xl">
-                        <span class="text-5xl">🎶</span>
-                    </div>
-                    <div id="sidebar-waveAnimation" class="wave-animation absolute -bottom-3 left-1/2 transform -translate-x-1/2">
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
-                        <div class="wave-bar"></div>
-                    </div>
-                </div>
-                <!-- Song Info -->
-                <div class="text-center">
-                    <h2 id="sidebar-songTitle" class="text-2xl font-bold text-white mb-2">No Song Playing</h2>
-                    <p id="sidebar-artistName" class="text-lg text-emerald-300 mb-2">Select a Song</p>
-                    <p id="sidebar-albumName" class="text-emerald-400">N/A</p>
-                    <!-- Progress Bar -->
-                    <div class="mt-4">
-                        <div class="flex justify-between text-sm text-emerald-300 mb-2">
-                            <span id="sidebar-currentTime">0:00</span>
-                            <span id="sidebar-totalTime">0:00</span>
-                        </div>
-                        <div class="w-full bg-white bg-opacity-20 rounded-full h-2 cursor-pointer" id="sidebar-progressContainer">
-                            <div id="sidebar-progressBar" class="progress-bar bg-white h-2 rounded-full" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <!-- Controls -->
-                    <div class="flex items-center justify-center space-x-4 mt-6">
-                        <button id="sidebar-prevBtn" class="text-white hover:text-emerald-300 transition-colors p-3" aria-label="Previous">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
-                            </svg>
-                        </button>
-                        <button id="sidebar-playBtn" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full p-4 hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-lg" aria-label="Play/Pause">
-                            <svg id="sidebar-playIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z"/>
-                            </svg>
-                            <svg id="sidebar-pauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                            </svg>
-                        </button>
-                        <button id="sidebar-nextBtn" class="text-white hover:text-emerald-300 transition-colors p-3" aria-label="Next">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <!-- Playlist Sidebar -->
+        <div id="playlist-sidebar" class="glass-effect rounded-2xl p-6 lg:block hidden">
+            <h3 class="text-2xl font-bold text-white mb-6" id="sidebar-title">Up Next</h3>
+            <div id="playlist-items" class="space-y-3"></div>
         </div>
     </div>
 
@@ -394,31 +368,14 @@
         const volumeControl = document.getElementById('volumeControl');
         const searchInput = document.getElementById('search-input');
         const searchButton = document.getElementById('search-button');
-        const searchResultsContainer = document.getElementById('search-results-container');
-        const searchResultsList = document.getElementById('search-results-list');
-        const spinner = document.createElement('div');
-        spinner.className = 'spinner';
-        const trendingContainer = document.getElementById('trending-container');
-        const trendingGrid = document.getElementById('trending-grid');
+        const resultsDiv = document.getElementById('results');
+        const spinner = document.getElementById('spinner');
+        const playlistItemsDiv = document.getElementById('playlist-items');
+        const playlistSidebar = document.getElementById('playlist-sidebar');
         const menuToggle = document.getElementById('menu-toggle');
         const mobileNav = document.getElementById('mobile-nav');
+        const sidebarTitle = document.getElementById('sidebar-title');
         const loginBtn = document.getElementById('google-login-btn');
-        const mainContent = document.querySelector('.main-content');
-        const playerSidebar = document.getElementById('player-sidebar');
-        const sidebarPlayBtn = document.getElementById('sidebar-playBtn');
-        const sidebarPlayIcon = document.getElementById('sidebar-playIcon');
-        const sidebarPauseIcon = document.getElementById('sidebar-pauseIcon');
-        const sidebarAlbumArt = document.getElementById('sidebar-albumArt');
-        const sidebarWaveAnimation = document.getElementById('sidebar-waveAnimation');
-        const sidebarProgressBar = document.getElementById('sidebar-progressBar');
-        const sidebarProgressContainer = document.getElementById('sidebar-progressContainer');
-        const sidebarCurrentTime = document.getElementById('sidebar-currentTime');
-        const sidebarTotalTime = document.getElementById('sidebar-totalTime');
-        const sidebarSongTitle = document.getElementById('sidebar-songTitle');
-        const sidebarArtistName = document.getElementById('sidebar-artistName');
-        const sidebarAlbumName = document.getElementById('sidebar-albumName');
-        const sidebarPrevBtn = document.getElementById('sidebar-prevBtn');
-        const sidebarNextBtn = document.getElementById('sidebar-nextBtn');
 
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
@@ -434,9 +391,6 @@
                 progressBar.style.width = `${progress}%`;
                 currentTimeEl.textContent = formatTime(currentTime);
                 totalTimeEl.textContent = formatTime(totalTime);
-                sidebarProgressBar.style.width = `${progress}%`;
-                sidebarCurrentTime.textContent = formatTime(currentTime);
-                sidebarTotalTime.textContent = formatTime(totalTime);
             }
         }
 
@@ -445,10 +399,6 @@
             pauseIcon.classList.toggle('hidden', !playing);
             albumArt.classList.toggle('playing', playing);
             waveAnimation.classList.toggle('playing', playing);
-            sidebarPlayIcon.classList.toggle('hidden', playing);
-            sidebarPauseIcon.classList.toggle('hidden', !playing);
-            sidebarAlbumArt.classList.toggle('playing', playing);
-            sidebarWaveAnimation.classList.toggle('playing', playing);
         }
 
         function togglePlay() {
@@ -470,25 +420,19 @@
             currentSongIndex = index;
             const song = playlist[index];
             playSong(song, skipPlay);
-            document.querySelectorAll('.trending-card, .search-result-row').forEach((item, i) => {
+            document.querySelectorAll('.playlist-item').forEach((item, i) => {
                 item.classList.toggle('bg-white', i === index);
                 item.classList.toggle('bg-opacity-20', i !== index);
             });
             if (currentUser) saveLastPlayed(index);
-            playerSidebar.classList.add('open');
-            mainContent.classList.add('shifted');
         }
 
         function playSong(song, skipPlay = false) {
             songTitle.textContent = song.title || song.name || 'Unknown Title';
             artistName.textContent = song.artist || (song.artists?.primary?.map(a => a.name).join(', ') || 'Unknown Artist');
             albumName.textContent = `Album: ${song.album?.name || 'N/A'} • ${new Date().getFullYear()}`;
-            sidebarSongTitle.textContent = song.title || song.name || 'Unknown Title';
-            sidebarArtistName.textContent = song.artist || (song.artists?.primary?.map(a => a.name).join(', ') || 'Unknown Artist');
-            sidebarAlbumName.textContent = `Album: ${song.album?.name || 'N/A'} • ${new Date().getFullYear()}`;
             const imgUrl = (song.image && Array.isArray(song.image) ? song.image[2]?.url : song.image) || 'https://via.placeholder.com/192';
             albumArt.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover rounded-full" alt="Album Art">`;
-            sidebarAlbumArt.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover rounded-full" alt="Album Art">`;
 
             const downloadUrls = song.downloadUrl || [];
             let audioUrl = downloadUrls.length > 0 ? downloadUrls[downloadUrls.length - 1].url : 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
@@ -499,9 +443,6 @@
             progressBar.style.width = '0%';
             currentTimeEl.textContent = '0:00';
             totalTimeEl.textContent = formatTime(totalTime);
-            sidebarProgressBar.style.width = '0%';
-            sidebarCurrentTime.textContent = '0:00';
-            sidebarTotalTime.textContent = formatTime(totalTime);
 
             if (!skipPlay) {
                 player.play().catch(error => {
@@ -540,7 +481,8 @@
                             id: song.id,
                             album: song.album
                         }));
-                        renderTrending();
+                        sidebarTitle.textContent = `${query.replace('trending ', '').charAt(0).toUpperCase() + query.replace('trending ', '').slice(1)} - Up Next`;
+                        renderPlaylist();
                         loadSong(0);
                     } else {
                         fallbackPlaylist(query);
@@ -561,19 +503,23 @@
                 duration: 180 + i * 30,
                 image: `https://via.placeholder.com/192?text=${title.substring(0, 1).toUpperCase()}`
             }));
-            renderTrending();
+            sidebarTitle.textContent = `${query.charAt(0).toUpperCase() + query.slice(1)} - Up Next`;
+            renderPlaylist();
             loadSong(0);
         }
 
         function loadSection(section) {
             spinner.classList.remove('hidden');
+            resultsDiv.innerHTML = '';
             let apiEndpoint = '';
             switch (section) {
                 case 'home':
-                    apiEndpoint = '/api/search/songs?query=trending&limit=20';
+                    apiEndpoint = '/api/trending?limit=20';
+                    sidebarTitle.textContent = 'Trending - Up Next';
                     break;
                 case 'browse':
                     apiEndpoint = '/api/browse/categories?limit=10';
+                    sidebarTitle.textContent = 'Browse - Up Next';
                     break;
                 case 'library':
                     if (currentUser) {
@@ -582,9 +528,11 @@
                         return;
                     }
                     apiEndpoint = '/api/library?limit=20';
+                    sidebarTitle.textContent = 'Library - Up Next';
                     break;
                 case 'playlists':
                     apiEndpoint = '/api/playlists/featured?limit=10';
+                    sidebarTitle.textContent = 'Playlists - Up Next';
                     break;
                 default:
                     apiEndpoint = '/api/search/songs?query=popular&limit=20';
@@ -604,8 +552,9 @@
                             id: song.id,
                             album: song.album
                         }));
-                        renderTrending();
+                        renderPlaylist();
                         if (playlist.length > 0) loadSong(0);
+                        displayResults(songs);
                     } else {
                         throw new Error('No data found');
                     }
@@ -618,24 +567,32 @@
         }
 
         function fallbackToLocal(section) {
-            renderTrending();
+            sidebarTitle.textContent = `${section.charAt(0).toUpperCase() + section.slice(1)} - Up Next`;
+            renderPlaylist();
+            resultsDiv.innerHTML = `<p class="text-emerald-300 text-sm">Loading ${section}... Using local playlist.</p>`;
         }
 
-        function renderTrending() {
-            trendingGrid.innerHTML = '';
+        function renderPlaylist() {
+            playlistItemsDiv.innerHTML = '';
             playlist.forEach((song, index) => {
                 const div = document.createElement('div');
-                div.className = 'trending-card';
+                div.className = 'playlist-item p-3 rounded-lg cursor-pointer transition-all';
                 div.innerHTML = `
-                    <img src="${song.image || 'https://via.placeholder.com/250x150'}" alt="${song.title || song.name} art" class="trending-art">
-                    <h4 class="text-white font-medium">${song.title || song.name}</h4>
-                    <p class="text-emerald-300 text-sm">${song.artist}</p>
+                    <div class="flex items-center space-x-3">
+                        <img src="${song.image || 'https://via.placeholder.com/64'}" alt="${song.title || song.name} art" class="w-12 h-12 rounded-full object-cover">
+                        <div class="flex-1">
+                            <h4 class="text-white font-medium">${song.title || song.name}</h4>
+                            <p class="text-emerald-300 text-sm">${song.artist}</p>
+                        </div>
+                        <span class="text-emerald-300 text-sm">${formatTime(song.duration)}</span>
+                    </div>
                 `;
                 div.addEventListener('click', () => loadSong(index));
-                trendingGrid.appendChild(div);
+                playlistItemsDiv.appendChild(div);
             });
         }
 
+        // Google Login
         function initGoogleSignIn() {
             if (typeof gapi === 'undefined') {
                 console.error('gapi not loaded');
@@ -693,6 +650,7 @@
             });
         }
 
+        // User History
         function loadUserHistory() {
             if (!currentUser) return;
             const userId = currentUser.id;
@@ -704,7 +662,8 @@
                 const likedSongs = likedIds.map(id => playlist.find(s => (s.id || s.title) === id) || { title: 'Liked Song', artist: 'Unknown', duration: 180, image: 'https://via.placeholder.com/192' }).filter(Boolean);
                 if (likedSongs.length > 0) {
                     playlist = likedSongs;
-                    renderTrending();
+                    sidebarTitle.textContent = 'My Library (Liked Songs)';
+                    renderLikedSongs(likedSongs);
                 }
             }
 
@@ -739,6 +698,31 @@
                 if (!playlist.some(p => (p.id || p.title) === songKey)) playlist.push(song);
             }
             localStorage.setItem(`liked_${userId}`, JSON.stringify(liked));
+            if (sidebarTitle.textContent === 'My Library (Liked Songs)') {
+                renderLikedSongs(playlist.filter(s => liked.includes(s.id || s.title)));
+            } else {
+                renderPlaylist();
+            }
+        }
+
+        function renderLikedSongs(songs) {
+            playlistItemsDiv.innerHTML = '';
+            songs.forEach((song, index) => {
+                const div = document.createElement('div');
+                div.className = 'playlist-item p-3 rounded-lg cursor-pointer transition-all';
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <img src="${song.image || 'https://via.placeholder.com/64'}" alt="${song.title || song.name} art" class="w-12 h-12 rounded-full object-cover">
+                        <div class="flex-1">
+                            <h4 class="text-white font-medium">${song.title || song.name}</h4>
+                            <p class="text-emerald-300 text-sm">${song.artist}</p>
+                        </div>
+                        <span class="text-emerald-300 text-sm">${formatTime(song.duration)}</span>
+                    </div>
+                `;
+                div.addEventListener('click', () => loadSong(playlist.indexOf(song)));
+                playlistItemsDiv.appendChild(div);
+            });
         }
 
         function clearUserHistory() {
@@ -746,7 +730,8 @@
             const userId = currentUser.id;
             localStorage.removeItem(`lastPlayed_${userId}`);
             localStorage.removeItem(`liked_${userId}`);
-            fetchTrendingForInit();
+            sidebarTitle.textContent = 'Up Next';
+            renderPlaylist();
         }
 
         function searchSongs() {
@@ -755,10 +740,8 @@
                 alert('Please enter a search query.');
                 return;
             }
-            searchResultsContainer.classList.remove('hidden');
-            searchResultsContainer.classList.add('open');
             spinner.classList.remove('hidden');
-            searchResultsList.innerHTML = '';
+            resultsDiv.innerHTML = '';
             fetch(`https://annonymous-sage.vercel.app/api/search/songs?query=${encodeURIComponent(query)}&limit=20`)
                 .then(response => response.json())
                 .then(data => {
@@ -766,58 +749,53 @@
                     if (data.success && data.data && data.data.results) {
                         displayResults(data.data.results);
                     } else {
+                        sidebarTitle.textContent = 'Search Results';
                         displayLocalResults(query);
                     }
                 })
                 .catch(error => {
                     console.error('API Error:', error);
                     spinner.classList.add('hidden');
+                    sidebarTitle.textContent = 'Search Results';
                     displayLocalResults(query);
                 });
         }
 
         function displayResults(songs) {
-            searchResultsList.innerHTML = '';
+            sidebarTitle.textContent = 'Search Results';
+            playlistItemsDiv.innerHTML = '';
             songs.forEach(song => {
                 const songDiv = document.createElement('div');
-                songDiv.className = 'search-result-row';
+                songDiv.className = 'playlist-item p-3 rounded-lg cursor-pointer transition-all song-item';
                 const imgUrl = (song.image && Array.isArray(song.image) ? song.image[2]?.url : song.image) || 'https://via.placeholder.com/64';
                 const isLiked = currentUser && JSON.parse(localStorage.getItem(`liked_${currentUser.id}`) || '[]').includes(song.id || song.title);
                 songDiv.innerHTML = `
-                    <img src="${imgUrl}" alt="${song.name} art" class="search-result-art">
-                    <div class="search-result-info">
-                        <div class="search-result-title">${song.name}</div>
-                        <div class="search-result-artist">${song.artists.primary.map(a => a.name).join(', ')}</div>
-                    </div>
-                    <div class="search-result-actions">
-                        <button class="heart-icon ${isLiked ? 'heart-filled' : ''}">${isLiked ? '♥' : '♡'}</button>
-                        <button>▶</button>
-                        <span class="search-result-duration">${formatTime(song.duration)}</span>
+                    <div class="flex items-center space-x-3">
+                        <img src="${imgUrl}" alt="${song.name} art" class="w-12 h-12 rounded-full object-cover">
+                        <div class="flex-1">
+                            <h4 class="text-white font-medium">${song.name}</h4>
+                            <p class="text-emerald-300 text-sm">${song.artists.primary.map(artist => artist.name).join(', ')}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="text-red-400 hover:text-red-300 heart-icon">${isLiked ? '♥' : '♡'}</button>
+                            <span class="text-emerald-300 text-sm">${formatTime(song.duration)}</span>
+                        </div>
                     </div>
                 `;
-                const heartBtn = songDiv.querySelector('.heart-icon');
-                heartBtn.addEventListener('click', (e) => {
+                songDiv.querySelector('.heart-icon').addEventListener('click', (e) => {
                     e.stopPropagation();
-                    toggleLike(song, heartBtn);
-                });
-                const playBtn = songDiv.querySelector('button:nth-child(2)');
-                playBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    playSong(song);
-                    if (!playlist.some(p => p.id === song.id)) {
-                        playlist.push(song);
-                        renderTrending();
-                    }
+                    toggleLike(song, e.target);
                 });
                 songDiv.addEventListener('click', () => {
                     playSong(song);
                     if (!playlist.some(p => p.id === song.id)) {
                         playlist.push(song);
-                        renderTrending();
+                        renderPlaylist();
                     }
                 });
-                searchResultsList.appendChild(songDiv);
+                playlistItemsDiv.appendChild(songDiv);
             });
+            resultsDiv.innerHTML = '';
         }
 
         function displayLocalResults(query) {
@@ -826,46 +804,43 @@
                 (song.artist || '').toLowerCase().includes(query.toLowerCase())
             );
             if (filtered.length > 0) {
-                searchResultsList.innerHTML = '';
+                sidebarTitle.textContent = 'Local Matches';
+                playlistItemsDiv.innerHTML = '';
                 filtered.forEach(song => {
                     const songDiv = document.createElement('div');
-                    songDiv.className = 'search-result-row';
+                    songDiv.className = 'playlist-item p-3 rounded-lg cursor-pointer transition-all song-item';
                     const imgUrl = song.image || 'https://via.placeholder.com/64';
                     const isLiked = currentUser && JSON.parse(localStorage.getItem(`liked_${currentUser.id}`) || '[]').includes(song.id || song.title);
                     songDiv.innerHTML = `
-                        <img src="${imgUrl}" alt="${song.title || song.name} art" class="search-result-art">
-                        <div class="search-result-info">
-                            <div class="search-result-title">${song.title || song.name}</div>
-                            <div class="search-result-artist">${song.artist}</div>
-                        </div>
-                        <div class="search-result-actions">
-                            <button class="heart-icon ${isLiked ? 'heart-filled' : ''}">${isLiked ? '♥' : '♡'}</button>
-                            <button>▶</button>
-                            <span class="search-result-duration">${formatTime(song.duration)}</span>
+                        <div class="flex items-center space-x-3">
+                            <img src="${imgUrl}" alt="${song.title || song.name} art" class="w-12 h-12 rounded-full object-cover">
+                            <div class="flex-1">
+                                <h4 class="text-white font-medium">${song.title || song.name}</h4>
+                                <p class="text-emerald-300 text-sm">${song.artist}</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="text-red-400 hover:text-red-300 heart-icon">${isLiked ? '♥' : '♡'}</button>
+                                <span class="text-emerald-300 text-sm">${formatTime(song.duration)}</span>
+                            </div>
                         </div>
                     `;
-                    const heartBtn = songDiv.querySelector('.heart-icon');
-                    heartBtn.addEventListener('click', (e) => {
+                    songDiv.querySelector('.heart-icon').addEventListener('click', (e) => {
                         e.stopPropagation();
-                        toggleLike(song, heartBtn);
-                    });
-                    const playBtn = songDiv.querySelector('button:nth-child(2)');
-                    playBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const index = playlist.findIndex(s => (s.title || s.name) === (song.title || song.name));
-                        loadSong(index);
+                        toggleLike(song, e.target);
                     });
                     songDiv.addEventListener('click', () => {
                         const index = playlist.findIndex(s => (s.title || s.name) === (song.title || song.name));
                         loadSong(index);
                     });
-                    searchResultsList.appendChild(songDiv);
+                    playlistItemsDiv.appendChild(songDiv);
                 });
+                resultsDiv.innerHTML = '';
             }
         }
 
         function toggleMobileNav() {
             mobileNav.classList.toggle('open');
+            playlistSidebar.classList.toggle('hidden');
         }
 
         // Event Listeners
@@ -879,7 +854,7 @@
                     const j = Math.floor(Math.random() * (i + 1));
                     [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
                 }
-                renderTrending();
+                renderPlaylist();
                 loadSong(0);
             }
         });
@@ -912,17 +887,6 @@
             progressBar.style.width = `${progress}%`;
             currentTimeEl.textContent = formatTime(currentTime);
         });
-        sidebarProgressContainer.addEventListener('click', (e) => {
-            const rect = sidebarProgressContainer.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const width = rect.width;
-            const clickPercent = clickX / width;
-            currentTime = clickPercent * (totalTime || player.duration || 0);
-            player.currentTime = currentTime;
-            const progress = totalTime > 0 ? (currentTime / totalTime) * 100 : 0;
-            sidebarProgressBar.style.width = `${progress}%`;
-            sidebarCurrentTime.textContent = formatTime(currentTime);
-        });
         searchButton.addEventListener('click', searchSongs);
         searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchSongs(); });
         menuToggle.addEventListener('click', toggleMobileNav);
@@ -934,9 +898,6 @@
                 signOut();
             }
         });
-        sidebarPlayBtn.addEventListener('click', togglePlay);
-        sidebarPrevBtn.addEventListener('click', prevSong);
-        sidebarNextBtn.addEventListener('click', nextSong);
         player.addEventListener('timeupdate', updateProgress);
         player.addEventListener('ended', () => {
             const mode = repeatBtn.dataset.mode;
@@ -979,30 +940,31 @@
                             album: song.album
                         }));
                         renderTrending();
-                        if (playlist.length > 0) loadSong(0, true);
+                        loadSong(0, true);
                     } else {
+                        // Dynamic trending fallback
                         playlist = [
-                            { title: "Global Hit 2025", artist: "Pop Star A", duration: 210, image: "https://via.placeholder.com/250x150?text=G", downloadUrl: [], id: "1", album: { name: "Pop Hits" } },
-                            { title: "Dance Fever", artist: "DJ X", duration: 245, image: "https://via.placeholder.com/250x150?text=D", downloadUrl: [], id: "2", album: { name: "Dance 2025" } },
-                            { title: "Soulful Vibes", artist: "Soul Singer B", duration: 198, image: "https://via.placeholder.com/250x150?text=S", downloadUrl: [], id: "3", album: { name: "Soul Classics" } },
-                            { title: "Rock Anthem", artist: "Rock Band C", duration: 230, image: "https://via.placeholder.com/250x150?text=R", downloadUrl: [], id: "4", album: { name: "Rock Legends" } },
-                            { title: "Chill Beat", artist: "Lo-Fi D", duration: 185, image: "https://via.placeholder.com/250x150?text=C", downloadUrl: [], id: "5", album: { name: "Chill Vibes" } }
+                            { title: "Global Hit 2025", artist: "Pop Star A", duration: 210, image: "https://via.placeholder.com/192?text=G" },
+                            { title: "Dance Fever", artist: "DJ X", duration: 245, image: "https://via.placeholder.com/192?text=D" },
+                            { title: "Soulful Vibes", artist: "Soul Singer B", duration: 198, image: "https://via.placeholder.com/192?text=S" },
+                            { title: "Rock Anthem", artist: "Rock Band C", duration: 230, image: "https://via.placeholder.com/192?text=R" },
+                            { title: "Chill Beat", artist: "Lo-Fi D", duration: 185, image: "https://via.placeholder.com/192?text=C" }
                         ];
                         renderTrending();
-                        if (playlist.length > 0) loadSong(0, true);
+                        loadSong(0, true);
                     }
                 })
                 .catch(error => {
                     console.error('Trending fetch failed:', error);
                     playlist = [
-                        { title: "Global Hit 2025", artist: "Pop Star A", duration: 210, image: "https://via.placeholder.com/250x150?text=G", downloadUrl: [], id: "1", album: { name: "Pop Hits" } },
-                        { title: "Dance Fever", artist: "DJ X", duration: 245, image: "https://via.placeholder.com/250x150?text=D", downloadUrl: [], id: "2", album: { name: "Dance 2025" } },
-                        { title: "Soulful Vibes", artist: "Soul Singer B", duration: 198, image: "https://via.placeholder.com/250x150?text=S", downloadUrl: [], id: "3", album: { name: "Soul Classics" } },
-                        { title: "Rock Anthem", artist: "Rock Band C", duration: 230, image: "https://via.placeholder.com/250x150?text=R", downloadUrl: [], id: "4", album: { name: "Rock Legends" } },
-                        { title: "Chill Beat", artist: "Lo-Fi D", duration: 185, image: "https://via.placeholder.com/250x150?text=C", downloadUrl: [], id: "5", album: { name: "Chill Vibes" } }
+                        { title: "Global Hit 2025", artist: "Pop Star A", duration: 210, image: "https://via.placeholder.com/192?text=G" },
+                        { title: "Dance Fever", artist: "DJ X", duration: 245, image: "https://via.placeholder.com/192?text=D" },
+                        { title: "Soulful Vibes", artist: "Soul Singer B", duration: 198, image: "https://via.placeholder.com/192?text=S" },
+                        { title: "Rock Anthem", artist: "Rock Band C", duration: 230, image: "https://via.placeholder.com/192?text=R" },
+                        { title: "Chill Beat", artist: "Lo-Fi D", duration: 185, image: "https://via.placeholder.com/192?text=C" }
                     ];
                     renderTrending();
-                    if (playlist.length > 0) loadSong(0, true);
+                    loadSong(0, true);
                 });
         }
 
