@@ -1,34 +1,9 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    }
+    { "src": "package.json", "use": "@vercel/static-build" }
   ],
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
-        }
-      ]
-    }
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
