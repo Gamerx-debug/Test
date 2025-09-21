@@ -384,23 +384,23 @@
             `).join('');
         }
 
-        // Initial load with fallback queries
+        // Initial load
         async function loadInitialSongs() {
             const queries = ['popular', 'recent', 'top'];
             for (const query of queries) {
                 try {
                     console.log(`Trying initial load with query: ${query}`);
-                    const response = await fetch(`/api/search/songs?query=${encodeURIComponent(query)}&limit=20`);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const response = await fetch(`/api/search/songs?query=${encodeURIComponent(query)}&limit=10`);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     const data = await response.json();
-                    console.log('Initial load response:', data);
-                    allSongs = data.data?.songs || [];
-                    if (allSongs.length > 0) {
+                    console.log('Initial load response:', JSON.stringify(data, null, 2));
+                    if (data.success && data.data?.songs?.length > 0) {
+                        allSongs = data.data.songs;
                         displaySongs(allSongs);
                         return;
                     }
                 } catch (error) {
-                    console.error(`Initial load error (${query}):`, error);
+                    console.error(`Initial load error (${query}):`, error.message);
                 }
             }
             document.getElementById('songList').innerHTML = '<div class="no-songs">No songs available. Try searching!</div>';
@@ -410,24 +410,24 @@
         async function searchSongs() {
             const query = document.getElementById('searchInput').value.trim();
             if (query.length < 2) {
-                loadInitialSongs(); // Revert to initial songs
+                loadInitialSongs();
                 return;
             }
             try {
                 console.log('Searching for:', query);
-                const response = await fetch(`/api/search/songs?query=${encodeURIComponent(query)}&limit=20`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const response = await fetch(`/api/search/songs?query=${encodeURIComponent(query)}&limit=10`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 const data = await response.json();
-                console.log('Search response:', data);
-                allSongs = data.data?.songs || [];
-                if (allSongs.length === 0) {
-                    document.getElementById('songList').innerHTML = `<div class="no-songs">No songs found for "${query}". Try another search.</div>`;
-                } else {
+                console.log('Search response:', JSON.stringify(data, null, 2));
+                if (data.success && data.data?.songs?.length > 0) {
+                    allSongs = data.data.songs;
                     displaySongs(allSongs);
+                } else {
+                    document.getElementById('songList').innerHTML = `<div class="no-songs">No songs found for "${query}". Try another search.</div>`;
                 }
             } catch (error) {
-                console.error('Search error:', error);
-                document.getElementById('songList').innerHTML = `<div class="no-songs">Search failed for "${query}". Check console.</div>`;
+                console.error('Search error:', error.message);
+                document.getElementById('songList').innerHTML = `<div class="no-songs">Search failed for "${query}". Check console for details.</div>`;
             }
         }
 
@@ -460,7 +460,7 @@
                 return;
             }
             audio.src = song.media_url;
-            audio.play().catch(e => console.error('Playback error:', e));
+            audio.play().catch(e => console.error('Playback error:', e.message));
             updatePlayer(song);
             isPlaying = true;
             document.getElementById('playPauseBtn').textContent = '⏸';
@@ -472,7 +472,7 @@
                 audio.pause();
                 document.getElementById('playPauseBtn').textContent = '▶';
             } else {
-                audio.play().catch(e => console.error('Playback error:', e));
+                audio.play().catch(e => console.error('Playback error:', e.message));
                 document.getElementById('playPauseBtn').textContent = '⏸';
             }
             isPlaying = !isPlaying;
