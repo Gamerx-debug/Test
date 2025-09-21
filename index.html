@@ -252,7 +252,7 @@
             <input type="email" placeholder="Email" id="email" required>
             <input type="password" placeholder="Password" id="password" required>
             <button type="submit">Sign In</button>
-            <p style="margin-top: 1rem; color: #ddd;">Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a></p>
+            <p style="margin-top: 1rem; color: #ddd;">Don't have an account? <a href="#" onclick="showSignup(); return false;">Sign Up</a></p>
         </form>
     </div>
 
@@ -302,6 +302,10 @@
         let queue = [];
         let allSongs = [];
 
+        function showSignup() {
+            alert('Sign up functionality - implement backend');
+        }
+
         // Login
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -312,8 +316,6 @@
                 document.getElementById('userName').textContent = email.split('@')[0];
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'flex';
-                // Mock sign up
-                showSignup = () => alert('Sign up functionality - implement backend');
             }, 1000);
         });
 
@@ -400,8 +402,10 @@
         }
 
         function updateProgress() {
-            const progress = (audio.currentTime / audio.duration) * 100;
-            document.getElementById('progressFilled').style.width = progress + '%';
+            if (audio.duration) {
+                const progress = (audio.currentTime / audio.duration) * 100;
+                document.getElementById('progressFilled').style.width = progress + '%';
+            }
         }
 
         document.getElementById('progress').addEventListener('click', (e) => {
@@ -443,6 +447,9 @@
 
         // Initial load - perhaps popular songs, but for now empty
         displaySongs([]);
+        // Add progress listener once
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('ended', nextSong);
     </script>
 </body>
 </html>
