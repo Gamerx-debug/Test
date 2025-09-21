@@ -137,6 +137,10 @@
             color: #b3b3b3;
             font-size: 0.9rem;
         }
+        .song-duration {
+            color: #b3b3b3;
+            font-size: 0.8rem;
+        }
         .song-actions {
             display: flex;
             justify-content: space-between;
@@ -242,6 +246,10 @@
             object-fit: cover;
             border-radius: 3px;
         }
+        .queue-duration {
+            color: #b3b3b3;
+            font-size: 0.8rem;
+        }
         @media (max-width: 768px) {
             .playlist-grid, .song-grid {
                 grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -270,7 +278,7 @@
     <!-- Main App -->
     <div id="mainApp" class="main-container">
         <header>
-            <div class="logo">MusicPioneer</div>
+            <div class="logo">MusicPioneer 🎧</div>
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Search for songs..." oninput="debouncedSearch()">
             </div>
@@ -319,9 +327,16 @@
 
         // Mock playlists (from your document)
         const playlists = [
-            { title: "Chill Nights", info: "24 songs • 1h 32m", image: "https://via.placeholder.com/150?text=Chill+Nights" },
-            { title: "Hot Hits", info: "50 songs • 3h 15m", image: "https://via.placeholder.com/150?text=Hot+Hits" }
+            { title: "🌙 Chill Nights", info: "24 songs • 1h 32m", image: "https://via.placeholder.com/150?text=Chill+Nights" },
+            { title: "🔥 Hot Hits", info: "50 songs • 3h 15m", image: "https://via.placeholder.com/150?text=Hot+Hits" }
         ];
+
+        // Format duration (seconds to mm:ss)
+        function formatDuration(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
 
         function showSignup() {
             alert('Sign up functionality - implement backend');
@@ -375,11 +390,11 @@
             for (const query of queries) {
                 try {
                     console.log(`Trying initial load with query: ${query}`);
-                    const response = await fetch(`https://annonymous-sage.vercel.app/api/search/songs?query=${encodeURIComponent(query)}&limit=20`);
+                    const response = await fetch(`/api/search/songs?query=${encodeURIComponent(query)}&limit=20`);
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     const data = await response.json();
                     console.log('Initial load response:', data);
-                    allSongs = data.songs || data.data?.songs || data.results || data.data?.results || [];
+                    allSongs = data.data?.songs || [];
                     if (allSongs.length > 0) {
                         displaySongs(allSongs);
                         return;
@@ -388,10 +403,10 @@
                     console.error(`Initial load error (${query}):`, error);
                 }
             }
-            document.getElementById('songList').innerHTML = '<div class="no-songs">No songs available. Try searching or check API.</div>';
+            document.getElementById('songList').innerHTML = '<div class="no-songs">No songs available. Try searching!</div>';
         }
 
-        // Search
+        // Search via proxy
         async function searchSongs() {
             const query = document.getElementById('searchInput').value.trim();
             if (query.length < 2) {
@@ -400,19 +415,19 @@
             }
             try {
                 console.log('Searching for:', query);
-                const response = await fetch(`https://annonymous-sage.vercel.app/api/search/songs?query=${encodeURIComponent(query)}&limit=20`);
+                const response = await fetch(`/api/search/songs?query=${encodeURIComponent(query)}&limit=20`);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json();
                 console.log('Search response:', data);
-                allSongs = data.songs || data.data?.songs || data.results || data.data?.results || [];
+                allSongs = data.data?.songs || [];
                 if (allSongs.length === 0) {
-                    document.getElementById('songList').innerHTML = '<div class="no-songs">No songs found for "' + query + '". Try another search.</div>';
+                    document.getElementById('songList').innerHTML = `<div class="no-songs">No songs found for "${query}". Try another search.</div>`;
                 } else {
                     displaySongs(allSongs);
                 }
             } catch (error) {
                 console.error('Search error:', error);
-                document.getElementById('songList').innerHTML = '<div class="no-songs">Search failed for "' + query + '". Check console or try again.</div>';
+                document.getElementById('songList').innerHTML = `<div class="no-songs">Search failed for "${query}". Check console.</div>`;
             }
         }
 
@@ -424,12 +439,13 @@
             }
             container.innerHTML = songs.map((song, index) => `
                 <div class="song-card" onclick="playSong(${index})">
-                    <img class="song-image" src="${song.image || 'https://via.placeholder.com/150?text=Song'}" alt="${song.title || 'Song'}">
-                    <div class="song-title">${song.title || 'Unknown Title'}</div>
-                    <div class="song-artist">${song.singers || song.artist || 'Unknown Artist'}</div>
+                    <img class="song-image" src="${song.image}" alt="${song.title}">
+                    <div class="song-title">${song.title}</div>
+                    <div class="song-artist">${song.artist}</div>
+                    <div class="song-duration">${formatDuration(song.duration)}</div>
                     <div class="song-actions">
                         <button onclick="event.stopPropagation(); addToQueue(${index})">➕</button>
-                        <button onclick="event.stopPropagation(); downloadSong('${song.media_url || ''}', '${(song.title || 'song').replace(/[^a-z0-9]/gi, '_')}')">⬇</button>
+                        <button onclick="event.stopPropagation(); downloadSong('${song.media_url}', '${(song.title).replace(/[^a-z0-9]/gi, '_')}')">⬇</button>
                     </div>
                 </div>
             `).join('');
@@ -475,7 +491,7 @@
         function updatePlayer(song) {
             document.getElementById('playerArt').src = song.image || 'https://via.placeholder.com/50?text=Song';
             document.getElementById('playerTitle').textContent = song.title || 'Unknown';
-            document.getElementById('playerArtist').textContent = song.singers || song.artist || 'Unknown';
+            document.getElementById('playerArtist').textContent = song.artist || 'Unknown';
         }
 
         function updateProgress() {
@@ -503,6 +519,7 @@
                 <div class="queue-item">
                     <img src="${song.image || 'https://via.placeholder.com/40?text=Song'}" alt="">
                     <span>${song.title || 'Unknown'}</span>
+                    <span class="queue-duration">${formatDuration(song.duration)}</span>
                 </div>
             `).join('');
         }
@@ -516,7 +533,7 @@
             if (url) {
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${title}.mp3`;
+                a.download = `${title}.mp4`; // JioSaavn uses .mp4 for audio
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -531,7 +548,7 @@
         audio.addEventListener('play', () => { isPlaying = true; });
         audio.addEventListener('pause', () => { isPlaying = false; });
 
-        // Initial empty display
+        // Initial display
         displaySongs([]);
         loadPlaylists();
     </script>
