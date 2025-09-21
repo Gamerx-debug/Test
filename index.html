@@ -186,12 +186,19 @@
             color: #b3b3b3;
             font-size: 0.9rem;
         }
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            font-size: 0.8rem;
+            color: #b3b3b3;
+        }
         .progress {
-            width: 100%;
+            flex: 1;
             height: 4px;
             background: #404040;
             border-radius: 2px;
-            margin: 0.5rem 0;
             cursor: pointer;
         }
         .progress-filled {
@@ -224,6 +231,7 @@
             background: #282828;
             transition: right 0.3s;
             padding: 2rem;
+            overflow-y: auto;
         }
         .queue.open {
             right: 0;
@@ -245,6 +253,14 @@
             height: 40px;
             object-fit: cover;
             border-radius: 3px;
+        }
+        .queue-title {
+            font-weight: bold;
+            flex: 1;
+        }
+        .queue-artist {
+            color: #b3b3b3;
+            font-size: 0.8rem;
         }
         .queue-duration {
             color: #b3b3b3;
@@ -299,8 +315,12 @@
                 <div id="playerTitle" class="player-title">No Song Playing</div>
                 <div id="playerArtist" class="player-artist">Select a Song</div>
             </div>
-            <div class="progress" id="progress">
-                <div class="progress-filled" id="progressFilled"></div>
+            <div class="progress-container">
+                <span id="currentTime">0:00</span>
+                <div class="progress" id="progress">
+                    <div class="progress-filled" id="progressFilled"></div>
+                </div>
+                <span id="totalTime">0:00</span>
             </div>
             <div class="player-controls">
                 <button onclick="prevSong()">⏮</button>
@@ -325,10 +345,33 @@
         let allSongs = [];
         let searchTimeout;
 
-        // Mock playlists (from your document)
+        // Featured playlists from document (clickable to load mock songs)
         const playlists = [
-            { title: "🌙 Chill Nights", info: "24 songs • 1h 32m", image: "https://via.placeholder.com/150?text=Chill+Nights" },
-            { title: "🔥 Hot Hits", info: "50 songs • 3h 15m", image: "https://via.placeholder.com/150?text=Hot+Hits" }
+            { 
+                title: "🌙 Chill Nights", 
+                info: "24 songs • 1h 32m", 
+                image: "https://via.placeholder.com/150?text=Chill+Nights",
+                songs: [
+                    { title: "Midnight Dreams", artist: "Luna Eclipse", image: "https://via.placeholder.com/150?text=Midnight", media_url: "", duration: 225 }
+                ]
+            },
+            { 
+                title: "🔥 Hot Hits", 
+                info: "50 songs • 3h 15m", 
+                image: "https://via.placeholder.com/150?text=Hot+Hits",
+                songs: [
+                    { title: "Stellar Journey", artist: "Cosmic Waves", image: "https://via.placeholder.com/150?text=Stellar", media_url: "", duration: 252 }
+                ]
+            }
+        ];
+
+        // Up Next queue from document (static initial data)
+        const initialQueue = [
+            { emoji: "🎶", title: "Midnight Dreams", artist: "Luna Eclipse", duration: 225 },
+            { emoji: "⭐", title: "Stellar Journey", artist: "Cosmic Waves", duration: 252 },
+            { emoji: "⚡", title: "Electric Pulse", artist: "Neon Nights", duration: 208 },
+            { emoji: "🌊", title: "Ocean Breeze", artist: "Serene Sounds", duration: 303 },
+            { emoji: "💫", title: "Digital Dreams", artist: "Synth Masters", duration: 285 }
         ];
 
         // Format duration (seconds to mm:ss)
@@ -360,6 +403,7 @@
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'flex';
                 loadPlaylists();
+                loadInitialQueue();
                 loadInitialSongs();
             }, 1000);
         });
@@ -372,16 +416,28 @@
             document.getElementById('player').style.display = 'none';
         }
 
-        // Display playlists
+        // Load playlists (click to "load" songs)
         function loadPlaylists() {
             const container = document.getElementById('playlistList');
-            container.innerHTML = playlists.map((playlist) => `
-                <div class="playlist-card" onclick="alert('Playlist selection - implement API')">
+            container.innerHTML = playlists.map((playlist, index) => `
+                <div class="playlist-card" onclick="loadPlaylist(${index})">
                     <img class="playlist-image" src="${playlist.image}" alt="${playlist.title}">
                     <div class="playlist-title">${playlist.title}</div>
                     <div class="playlist-info">${playlist.info}</div>
                 </div>
             `).join('');
+        }
+
+        function loadPlaylist(index) {
+            allSongs = playlists[index].songs;
+            displaySongs(allSongs);
+            alert(`${playlists[index].title} loaded!`); // Simulate loading
+        }
+
+        // Load initial Up Next queue from document
+        function loadInitialQueue() {
+            queue = initialQueue.map(q => ({ ...q, image: "https://via.placeholder.com/40?text=${q.emoji}" }));
+            updateQueue();
         }
 
         // Initial load
@@ -403,7 +459,9 @@
                     console.error(`Initial load error (${query}):`, error.message);
                 }
             }
-            document.getElementById('songList').innerHTML = '<div class="no-songs">No songs available. Try searching!</div>';
+            // Fallback to first playlist
+            allSongs = playlists[0].songs;
+            displaySongs(allSongs);
         }
 
         // Search via proxy
@@ -490,14 +548,17 @@
 
         function updatePlayer(song) {
             document.getElementById('playerArt').src = song.image || 'https://via.placeholder.com/50?text=Song';
-            document.getElementById('playerTitle').textContent = song.title || 'Unknown';
-            document.getElementById('playerArtist').textContent = song.artist || 'Unknown';
+            document.getElementById('playerTitle').textContent = song.title || 'No Song Playing';
+            document.getElementById('playerArtist').textContent = song.artist || 'Select a Song';
+            document.getElementById('totalTime').textContent = formatDuration(song.duration || 0);
         }
 
         function updateProgress() {
             if (audio.duration && !isNaN(audio.duration)) {
                 const progress = (audio.currentTime / audio.duration) * 100;
                 document.getElementById('progressFilled').style.width = progress + '%';
+                document.getElementById('currentTime').textContent = formatDuration(audio.currentTime);
+                document.getElementById('totalTime').textContent = formatDuration(audio.duration);
             }
         }
 
@@ -509,7 +570,7 @@
 
         function addToQueue(index) {
             const song = allSongs[index];
-            queue.push(song);
+            queue.push({ ...song, emoji: "🎶" }); // Add emoji like document
             updateQueue();
         }
 
@@ -518,8 +579,11 @@
             container.innerHTML = queue.map((song) => `
                 <div class="queue-item">
                     <img src="${song.image || 'https://via.placeholder.com/40?text=Song'}" alt="">
-                    <span>${song.title || 'Unknown'}</span>
-                    <span class="queue-duration">${formatDuration(song.duration)}</span>
+                    <div>
+                        <div class="queue-title">${song.emoji || ''} ${song.title || 'Unknown'}</div>
+                        <div class="queue-artist">${song.artist || 'Unknown'}</div>
+                    </div>
+                    <div class="queue-duration">${formatDuration(song.duration)}</div>
                 </div>
             `).join('');
         }
@@ -533,7 +597,7 @@
             if (url) {
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${title}.mp4`; // JioSaavn uses .mp4 for audio
+                a.download = `${title}.mp4`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -549,6 +613,7 @@
         audio.addEventListener('pause', () => { isPlaying = false; });
 
         // Initial display
+        loadInitialQueue(); // Load Up Next from document
         displaySongs([]);
         loadPlaylists();
     </script>
