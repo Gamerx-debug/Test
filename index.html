@@ -11,7 +11,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #000;
             color: #fff;
             overflow-x: hidden;
@@ -31,38 +31,33 @@
         .login-modal {
             background: #000;
             border: 1px solid #333;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 2rem;
             text-align: center;
-            width: 320px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            width: 300px;
         }
         .login-modal h1 {
-            margin-bottom: 1.5rem;
-            color: #1db954;
-            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #fff;
         }
         .login-modal input {
             width: 100%;
-            padding: 0.9rem;
-            margin: 0.75rem 0;
-            border: 1px solid #444;
-            border-radius: 6px;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 1px solid #333;
+            border-radius: 4px;
             background: #111;
             color: #fff;
-            font-size: 0.9rem;
         }
         .login-modal button {
             width: 100%;
-            padding: 0.9rem;
-            margin: 0.75rem 0;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             background: #1db954;
             color: #fff;
-            font-size: 1rem;
             cursor: pointer;
-            transition: background 0.3s;
         }
         .login-modal button:hover {
             background: #1ed760;
@@ -70,7 +65,6 @@
         .login-link {
             color: #1db954;
             text-decoration: none;
-            font-size: 0.9rem;
         }
         .main-container {
             display: none;
@@ -81,24 +75,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.2rem 2.5rem;
+            padding: 1rem 2rem;
             background: #000;
             border-bottom: 1px solid #333;
         }
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: #1db954;
         }
         .nav-links {
             display: flex;
-            gap: 1.5rem;
+            gap: 1rem;
+            align-items: center;
         }
         .nav-links a {
             color: #fff;
             text-decoration: none;
-            font-size: 1rem;
-            transition: color 0.3s;
+            font-size: 0.9rem;
         }
         .nav-links a:hover {
             color: #1db954;
@@ -106,60 +100,52 @@
         .user-info {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1rem;
         }
         .user-info span {
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
         .user-info button {
             background: none;
             border: none;
             color: #fff;
-            font-size: 1.2rem;
             cursor: pointer;
-            transition: color 0.3s;
-        }
-        .user-info button:hover {
-            color: #1db954;
         }
         .content {
             flex: 1;
-            padding: 2.5rem;
+            padding: 2rem;
             overflow-y: auto;
         }
         .section-title {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            color: #1db954;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
         }
         .playlist-grid, .song-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
         .playlist-card, .song-card {
             background: #111;
-            border-radius: 12px;
-            padding: 1.2rem;
+            border-radius: 8px;
+            padding: 1rem;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: transform 0.2s;
         }
         .playlist-card:hover, .song-card:hover {
-            transform: scale(1.03);
-            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.2);
+            transform: scale(1.02);
         }
         .playlist-image, .song-image {
             width: 100%;
             height: 150px;
             object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
         }
         .playlist-title, .song-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
         }
         .playlist-info, .song-artist {
             color: #b3b3b3;
@@ -172,138 +158,84 @@
         .song-actions {
             display: flex;
             justify-content: space-between;
-            margin-top: 0.75rem;
+            margin-top: 0.5rem;
         }
         .song-actions button {
             background: none;
             border: none;
             color: #fff;
             cursor: pointer;
-            font-size: 1.3rem;
-            transition: color 0.3s;
-        }
-        .song-actions button:hover {
-            color: #1db954;
+            font-size: 1.2rem;
         }
         .no-songs {
             text-align: center;
             color: #b3b3b3;
-            font-size: 1.2rem;
-            padding: 2.5rem;
+            font-size: 1.1rem;
+            padding: 2rem;
         }
         .player {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(to top, #000, #111);
+            background: #000;
             border-top: 1px solid #333;
-            padding: 1rem 2.5rem;
+            padding: 1rem;
             display: flex;
             align-items: center;
-            gap: 1.5rem;
-            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
+            gap: 1rem;
         }
         .player-art {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             object-fit: cover;
-            border-radius: 8px;
-            border: 2px solid #1db954;
+            border-radius: 4px;
         }
         .player-info {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
         }
         .player-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 200px;
+            font-weight: bold;
         }
         .player-artist {
             color: #b3b3b3;
             font-size: 0.9rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 200px;
         }
         .progress-container {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
             margin: 0.5rem 0;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #b3b3b3;
-            width: 100%;
         }
         .progress {
             flex: 1;
             height: 4px;
-            background: #333;
+            background: #404040;
             border-radius: 2px;
             cursor: pointer;
-            position: relative;
         }
         .progress-filled {
             height: 100%;
             background: #1db954;
             border-radius: 2px;
             width: 0%;
-            position: relative;
-        }
-        .progress-handle {
-            position: absolute;
-            top: -4px;
-            right: -6px;
-            width: 12px;
-            height: 12px;
-            background: #1db954;
-            border-radius: 50%;
-            transform: translateX(50%);
-            cursor: pointer;
         }
         .player-controls {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1rem;
         }
         .player-controls button {
             background: none;
             border: none;
             color: #fff;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             cursor: pointer;
-            transition: color 0.3s;
-        }
-        .player-controls button:hover {
-            color: #1db954;
         }
         .play-btn {
-            font-size: 2.2rem;
-        }
-        .volume-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .volume-slider {
-            width: 80px;
-            height: 4px;
-            background: #333;
-            border-radius: 2px;
-            cursor: pointer;
-        }
-        .volume-filled {
-            height: 100%;
-            background: #1db954;
-            border-radius: 2px;
-            width: 100%;
+            font-size: 2rem;
         }
         .queue {
             position: fixed;
@@ -321,64 +253,41 @@
             right: 0;
         }
         .queue h3 {
-            margin-bottom: 1.5rem;
-            color: #1db954;
+            margin-bottom: 1rem;
         }
         .queue-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            padding: 0.75rem;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
             background: #222;
-            border-radius: 6px;
-            transition: background 0.3s;
-        }
-        .queue-item:hover {
-            background: #2a2a2a;
+            border-radius: 4px;
         }
         .queue-item img {
             width: 40px;
             height: 40px;
             object-fit: cover;
-            border-radius: 4px;
+            border-radius: 2px;
         }
         .queue-title {
-            font-weight: 600;
+            font-weight: bold;
             flex: 1;
-            font-size: 1rem;
         }
         .queue-artist {
             color: #b3b3b3;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         .queue-duration {
             color: #b3b3b3;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         @media (max-width: 768px) {
             .playlist-grid, .song-grid {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             }
             header {
                 padding: 1rem;
-            }
-            .nav-links {
-                gap: 0.8rem;
-            }
-            .player {
-                padding: 1rem;
-                gap: 0.8rem;
-            }
-            .player-art {
-                width: 40px;
-                height: 40px;
-            }
-            .player-title, .player-artist {
-                max-width: 120px;
-            }
-            .volume-slider {
-                width: 60px;
             }
         }
     </style>
@@ -388,10 +297,10 @@
     <div id="loginOverlay" class="login-overlay">
         <div class="login-modal">
             <h1>Sign in to MusicPioneer</h1>
-            <input type="email" placeholder="Email" id="email">
-            <input type="password" placeholder="Password" id="password">
+            <input type="email" placeholder="Email" id="email" required>
+            <input type="password" placeholder="Password" id="password" required>
             <button onclick="handleLogin()">Sign in</button>
-            <p>Need an account? <a href="#" onclick="showSignup()">Sign up</a></p>
+            <p>Need an account? <a href="#" onclick="showSignup()" class="login-link">Sign up</a></p>
         </div>
     </div>
 
@@ -399,16 +308,10 @@
     <div id="mainApp" class="main-container">
         <header>
             <div class="logo">🎧 MusicPioneer</div>
-            <div class="nav-links">
-                <a href="#">Home</a>
-                <a href="#">Playlists</a>
-                <a href="#" onclick="toggleQueue()">Queue</a>
-                <a href="#">Downloads</a>
-                <a href="#">Settings</a>
-                <button onclick="logout()">🌙</button>
-            </div>
+            <div class="nav-links" id="navLinks"></div>
             <div class="user-info">
                 <span id="userName">User</span>
+                <button onclick="logout()">🌙</button>
             </div>
         </header>
         <div class="content">
@@ -420,29 +323,20 @@
         <div class="player" id="player">
             <img id="playerArt" class="player-art" src="" alt="">
             <div class="player-info">
-                <div id="playerTitle" class="player-title">Nothing playing</div>
-                <div id="playerArtist" class="player-artist"></div>
+                <div id="playerTitle" class="player-title">No Song Playing</div>
+                <div id="playerArtist" class="player-artist">Select a Song</div>
             </div>
             <div class="progress-container">
                 <span id="currentTime">0:00</span>
                 <div class="progress" id="progress">
                     <div class="progress-filled" id="progressFilled"></div>
-                    <div class="progress-handle"></div>
                 </div>
-                <span id="totalTime">— 0:00</span>
+                <span id="totalTime">0:00</span>
             </div>
             <div class="player-controls">
-                <button onclick="toggleShuffle()" id="shuffleBtn">🔀</button>
                 <button onclick="prevSong()">⏮</button>
                 <button id="playPauseBtn" class="play-btn" onclick="togglePlay()">▶</button>
                 <button onclick="nextSong()">⏭</button>
-                <button onclick="toggleRepeat()" id="repeatBtn">🔁</button>
-                <div class="volume-container">
-                    <button onclick="toggleMute()" id="volumeBtn">🔊</button>
-                    <div class="volume-slider" id="volumeSlider">
-                        <div class="volume-filled" id="volumeFilled"></div>
-                    </div>
-                </div>
                 <button onclick="toggleQueue()">📋</button>
             </div>
         </div>
@@ -451,311 +345,266 @@
             <div id="queueList"></div>
         </div>
     </div>
-
-    <script>
-        let currentUser = null;
-        let audio = new Audio();
-        let isPlaying = false;
-        let currentSongIndex = 0;
-        let queue = [];
-        let allSongs = [];
-        let searchTimeout;
-        let isShuffled = false;
-        let isRepeated = false;
-        let isMuted = false;
-        let volume = 1.0;
-
-        // Featured playlists (from document)
-        const playlists = [
-            { title: "🌙 Chill Nights", info: "24 songs • 1h 32m", image: "https://via.placeholder.com/150?text=Chill" },
-            { title: "🔥 Hot Hits", info: "50 songs • 3h 15m", image: "https://via.placeholder.com/150?text=Hot" }
-        ];
-
-        // Up Next queue (from document)
-        const initialQueue = [
-            { emoji: "🎶", title: "Midnight Dreams", artist: "Luna Eclipse", duration: 225, image: "https://via.placeholder.com/40?text=MD", media_url: "" },
-            { emoji: "⭐", title: "Stellar Journey", artist: "Cosmic Waves", duration: 252, image: "https://via.placeholder.com/40?text=SJ", media_url: "" },
-            { emoji: "⚡", title: "Electric Pulse", artist: "Neon Nights", duration: 208, image: "https://via.placeholder.com/40?text=EP", media_url: "" },
-            { emoji: "🌊", title: "Ocean Breeze", artist: "Serene Sounds", duration: 303, image: "https://via.placeholder.com/40?text=OB", media_url: "" },
-            { emoji: "💫", title: "Digital Dreams", artist: "Synth Masters", duration: 285, image: "https://via.placeholder.com/40?text=DD", media_url: "" }
-        ];
-
-        function formatDuration(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        function handleLogin() {
-            const email = document.getElementById('email').value;
-            if (email) {
-                currentUser = { email };
-                document.getElementById('userName').textContent = email.split('@')[0];
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'flex';
-                loadPlaylists();
-                loadInitialQueue();
-                loadInitialSongs();
-            }
-        }
-
-        function showSignup() {
-            alert('Sign up - implement backend');
-        }
-
-        function logout() {
-            currentUser = null;
-            document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('loginOverlay').style.display = 'flex';
-            audio.pause();
-            document.getElementById('player').style.display = 'none';
-        }
-
-        function loadPlaylists() {
-            const container = document.getElementById('playlistList');
-            container.innerHTML = playlists.map((playlist) => `
-                <div class="playlist-card" onclick="loadPlaylist('${playlist.title}')">
-                    <img class="playlist-image" src="${playlist.image}" alt="${playlist.title}">
-                    <div class="playlist-title">${playlist.title}</div>
-                    <div class="playlist-info">${playlist.info}</div>
-                </div>
-            `).join('');
-        }
-
-        function loadPlaylist(title) {
-            allSongs = [{ title, artist: "Various Artists", image: "https://via.placeholder.com/150?text=${title}", media_url: "", duration: 180 }];
-            displaySongs(allSongs);
-        }
-
-        function loadInitialQueue() {
-            queue = initialQueue;
-            updateQueue();
-        }
-
-        async function loadInitialSongs() {
-            try {
-                const response = await fetch('/api/search/songs?query=popular&limit=10');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.data?.songs?.length > 0) {
-                        allSongs = data.data.songs;
-                        displaySongs(allSongs);
-                        return;
-                    }
-                }
-            } catch (error) {
-                console.error('Initial load error:', error);
-            }
-            allSongs = [];
-            document.getElementById('songList').innerHTML = '<div class="no-songs">No songs available. Try searching!</div>';
-        }
-
-        function debouncedSearch() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(searchSongs, 300);
-        }
-
-        async function searchSongs() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (query.length < 2) {
-                loadInitialSongs();
-                return;
-            }
-            try {
-                const response = await fetch(`/api/search/songs?query=${encodeURIComponent(query)}&limit=10`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
-                if (data.success && data.data?.songs?.length > 0) {
-                    allSongs = data.data.songs;
-                    displaySongs(allSongs);
-                } else {
-                    document.getElementById('songList').innerHTML = `<div class="no-songs">No songs found for "${query}".</div>`;
-                }
-            } catch (error) {
-                console.error('Search error:', error);
-                document.getElementById('songList').innerHTML = `<div class="no-songs">Search failed for "${query}".</div>`;
-            }
-        }
-
-        function displaySongs(songs) {
-            const container = document.getElementById('songList');
-            if (songs.length === 0) {
-                container.innerHTML = '<div class="no-songs">No songs available.</div>';
-                return;
-            }
-            container.innerHTML = songs.map((song, index) => `
-                <div class="song-card" onclick="playSong(${index})">
-                    <img class="song-image" src="${song.image}" alt="${song.title}">
-                    <div class="song-title">${song.title}</div>
-                    <div class="song-artist">${song.artist}</div>
-                    <div class="song-duration">${formatDuration(song.duration)}</div>
-                    <div class="song-actions">
-                        <button onclick="event.stopPropagation(); addToQueue(${index})">➕</button>
-                        <button onclick="event.stopPropagation(); downloadSong(${index})">⬇</button>
-                        <button onclick="event.stopPropagation(); shareSong('${song.title}', '${song.media_url}')">↗</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function playSong(index) {
-            currentSongIndex = index;
-            const song = allSongs[index];
-            if (!song || !song.media_url) {
-                alert('Song not available');
-                return;
-            }
-            audio.src = song.media_url;
-            audio.play().catch(e => console.error('Playback error:', e));
-            updatePlayer(song);
-            isPlaying = true;
-            document.getElementById('playPauseBtn').textContent = '⏸';
-            document.getElementById('player').style.display = 'flex';
-        }
-
-        function togglePlay() {
-            if (isPlaying) {
-                audio.pause();
-                document.getElementById('playPauseBtn').textContent = '▶';
-            } else {
-                audio.play().catch(e => console.error('Playback error:', e));
-                document.getElementById('playPauseBtn').textContent = '⏸';
-            }
-            isPlaying = !isPlaying;
-        }
-
-        function nextSong() {
-            currentSongIndex = isShuffled ? Math.floor(Math.random() * allSongs.length) : (currentSongIndex + 1) % allSongs.length;
-            if (isRepeated && currentSongIndex === 0) currentSongIndex = allSongs.length - 1;
-            playSong(currentSongIndex);
-        }
-
-        function prevSong() {
-            currentSongIndex = (currentSongIndex - 1 + allSongs.length) % allSongs.length;
-            playSong(currentSongIndex);
-        }
-
-        function updatePlayer(song) {
-            document.getElementById('playerArt').src = song.image || '';
-            document.getElementById('playerTitle').textContent = song.title || 'Nothing playing';
-            document.getElementById('playerArtist').textContent = song.artist || '';
-            document.getElementById('totalTime').textContent = `— ${formatDuration(song.duration || 0)}`;
-            audio.volume = volume;
-        }
-
-        function updateProgress() {
-            if (audio.duration) {
-                const progress = (audio.currentTime / audio.duration) * 100;
-                document.getElementById('progressFilled').style.width = progress + '%';
-                document.getElementById('progressHandle').style.left = `calc(${progress}% - 6px)`;
-                document.getElementById('currentTime').textContent = formatDuration(audio.currentTime);
-            }
-        }
-
-        document.getElementById('progress').addEventListener('click', (e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const width = (e.clientX - rect.left) / rect.width;
-            audio.currentTime = width * audio.duration;
-        });
-
-        function toggleShuffle() {
-            isShuffled = !isShuffled;
-            document.getElementById('shuffleBtn').style.color = isShuffled ? '#1db954' : '#fff';
-        }
-
-        function toggleRepeat() {
-            isRepeated = !isRepeated;
-            document.getElementById('repeatBtn').style.color = isRepeated ? '#1db954' : '#fff';
-        }
-
-        function toggleMute() {
-            isMuted = !isMuted;
-            audio.muted = isMuted;
-            document.getElementById('volumeBtn').textContent = isMuted ? '🔇' : '🔊';
-            document.getElementById('volumeFilled').style.width = isMuted ? '0%' : `${volume * 100}%`;
-        }
-
-        document.getElementById('volumeSlider').addEventListener('click', (e) => {
-            const rect = e.currentTarget.getBoundingClientListener('click', (e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const width = (e.clientX - rect.left) / rect.width;
-                volume = Math.max(0, Math.min(1, width));
-                audio.volume = volume;
-                document.getElementById('volumeFilled').style.width = `${volume * 100}%`;
-                isMuted = false;
-                document.getElementById('volumeBtn').textContent = '🔊';
-            });
-
-        function addToQueue(index) {
-            const song = allSongs[index];
-            queue.push({ ...song, emoji: "🎶" });
-            updateQueue();
-        }
-
-        function updateQueue() {
-            const container = document.getElementById('queueList');
-            container.innerHTML = queue.map((song, index) => `
-                <div class="queue-item" onclick="playFromQueue(${index})">
-                    <img src="${song.image}" alt="">
-                    <div>
-                        <div class="queue-title">${song.emoji || ''} ${song.title}</div>
-                        <div class="queue-artist">${song.artist}</div>
-                    </div>
-                    <div class="queue-duration">${formatDuration(song.duration)}</div>
-                </div>
-            `).join('');
-        }
-
-        function playFromQueue(index) {
-            currentSongIndex = allSongs.findIndex(s => s.title === queue[index].title);
-            playSong(currentSongIndex);
-            queue = queue.slice(index);
-            updateQueue();
-        }
-
-        function toggleQueue() {
-            const queueEl = document.getElementById('queue');
-            queueEl.classList.toggle('open');
-        }
-
-        function downloadSong(index) {
-            const song = allSongs[index];
-            if (song.media_url) {
-                const a = document.createElement('a');
-                a.href = song.media_url;
-                a.download = `${song.title.replace(/[^a-z0-9]/gi, '_')}.mp3`; // Assuming MP3 for better compatibility
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                alert(`Downloading ${song.title}...`);
-            } else {
-                alert('Download not available for this song.');
-            }
-        }
-
-        function shareSong(title, url) {
-            if (navigator.share) {
-                navigator.share({
-                    title: `Share ${title}`,
-                    text: `Listen to ${title} on MusicPioneer!`,
-                    url: url
-                }).then(() => console.log('Shared successfully'))
-                  .catch((error) => console.error('Share failed:', error));
-            } else {
-                alert('Sharing not supported on this device. Copy the URL: ' + url);
-            }
-        }
-
-        // Event listeners
-        audio.addEventListener('timeupdate', updateProgress);
-        audio.addEventListener('ended', nextSong);
-        audio.addEventListener('loadedmetadata', () => {
-            document.getElementById('totalTime').textContent = `— ${formatDuration(audio.duration)}`;
-        });
-
-        // Initial setup
-        document.getElementById('loginOverlay').style.display = 'flex';
-        document.getElementById('progressHandle').style.display = 'block';
-    </script>
 </body>
+<script>
+    let currentUser = null;
+    let audio = new Audio();
+    let isPlaying = false;
+    let currentSongIndex = 0;
+    let queue = [];
+    let allSongs = [];
+    let searchTimeout;
+
+    // Featured playlists (from document)
+    const playlists = [
+        { title: "🌙 Chill Nights", info: "24 songs • 1h 32m", image: "https://via.placeholder.com/150?text=Chill+Nights" },
+        { title: "🔥 Hot Hits", info: "50 songs • 3h 15m", image: "https://via.placeholder.com/150?text=Hot+Hits" }
+    ];
+
+    // Up Next queue (from document)
+    const initialQueue = [
+        { emoji: "🎶", title: "Midnight Dreams", artist: "Luna Eclipse", duration: 225 },
+        { emoji: "⭐", title: "Stellar Journey", artist: "Cosmic Waves", duration: 252 },
+        { emoji: "⚡", title: "Electric Pulse", artist: "Neon Nights", duration: 208 },
+        { emoji: "🌊", title: "Ocean Breeze", artist: "Serene Sounds", duration: 303 },
+        { emoji: "💫", title: "Digital Dreams", artist: "Synth Masters", duration: 285 }
+    ];
+
+    function formatDuration(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Clock feature
+    function updateTime() {
+        const timeEl = document.createElement('span');
+        timeEl.id = 'time';
+        timeEl.style.fontSize = '0.9rem';
+        document.getElementById('navLinks').prepend(timeEl);
+        setInterval(() => {
+            timeEl.textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
+    }
+
+    function handleLogin() {
+        const email = document.getElementById('email').value;
+        if (email) {
+            currentUser = { email };
+            document.getElementById('userName').textContent = email.split('@')[0];
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'flex';
+            loadPlaylists();
+            loadInitialQueue();
+            loadInitialSongs();
+            updateTime(); // Start clock after login
+        } else {
+            alert('Please enter a valid email.');
+        }
+    }
+
+    function showSignup() {
+        alert('Sign up functionality - implement backend');
+    }
+
+    function logout() {
+        currentUser = null;
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('loginOverlay').style.display = 'flex';
+        audio.pause();
+        document.getElementById('player').style.display = 'none';
+    }
+
+    function loadPlaylists() {
+        const container = document.getElementById('playlistList');
+        container.innerHTML = playlists.map((playlist) => `
+            <div class="playlist-card" onclick="alert('Playlist selection - implement API')">
+                <img class="playlist-image" src="${playlist.image}" alt="${playlist.title}">
+                <div class="playlist-title">${playlist.title}</div>
+                <div class="playlist-info">${playlist.info}</div>
+            </div>
+        `).join('');
+    }
+
+    function loadInitialQueue() {
+        const container = document.getElementById('queueList');
+        container.innerHTML = initialQueue.map((song) => `
+            <div class="queue-item">
+                <img src="https://via.placeholder.com/40?text=Song" alt="">
+                <div class="queue-title">${song.emoji} ${song.title}</div>
+                <div class="queue-artist">${song.artist}</div>
+                <div class="queue-duration">${formatDuration(song.duration)}</div>
+            </div>
+        `).join('');
+    }
+
+    // Initial setup
+    document.getElementById('loginOverlay').style.display = 'flex';
+</script>
+<script>
+    // Initial load - popular songs
+    async function loadInitialSongs() {
+        const query = 'popular';
+        try {
+            const response = await fetch(`/api/search/songs?query=${encodeURIComponent(query)}&limit=10`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (data.success && data.data?.songs?.length > 0) {
+                allSongs = data.data.songs;
+                displaySongs(allSongs);
+            } else {
+                document.getElementById('songList').innerHTML = '<div class="no-songs">No songs available. Try searching!</div>';
+            }
+        } catch (error) {
+            console.error('Initial load error:', error);
+            document.getElementById('songList').innerHTML = '<div class="no-songs">Failed to load songs. Check console.</div>';
+        }
+    }
+
+    // Search
+    async function searchSongs() {
+        const query = document.getElementById('searchInput').value.trim();
+        if (query.length < 2) {
+            loadInitialSongs();
+            return;
+        }
+        try {
+            const response = await fetch(`/api/search/songs?query=${encodeURIComponent(query)}&limit=10`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (data.success && data.data?.songs?.length > 0) {
+                allSongs = data.data.songs;
+                displaySongs(allSongs);
+            } else {
+                document.getElementById('songList').innerHTML = '<div class="no-songs">No songs found for "' + query + '". Try another search.</div>';
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            document.getElementById('songList').innerHTML = '<div class="no-songs">Search failed for "' + query + '". Check console for details.</div>';
+        }
+    }
+
+    function displaySongs(songs) {
+        const container = document.getElementById('songList');
+        if (songs.length === 0) {
+            container.innerHTML = '<div class="no-songs">No songs available.</div>';
+            return;
+        }
+        container.innerHTML = songs.map((song, index) => `
+            <div class="song-card" onclick="playSong(${index})">
+                <img class="song-image" src="${song.image}" alt="${song.title}">
+                <div class="song-title">${song.title}</div>
+                <div class="song-artist">${song.artist}</div>
+                <div class="song-duration">${formatDuration(song.duration)}</div>
+                <div class="song-actions">
+                    <button onclick="event.stopPropagation(); addToQueue(${index})">➕</button>
+                    <button onclick="event.stopPropagation(); downloadSong('${song.media_url}', '${song.title}')">⬇</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function playSong(index) {
+        currentSongIndex = index;
+        const song = allSongs[index];
+        if (!song || !song.media_url) {
+            alert('Song not available');
+            return;
+        }
+        audio.src = song.media_url;
+        audio.play().catch(e => console.error('Playback error:', e));
+        updatePlayer(song);
+        isPlaying = true;
+        document.getElementById('playPauseBtn').textContent = '⏸';
+        document.getElementById('player').style.display = 'flex';
+    }
+
+    function togglePlay() {
+        if (isPlaying) {
+            audio.pause();
+            document.getElementById('playPauseBtn').textContent = '▶';
+        } else {
+            audio.play().catch(e => console.error('Playback error:', e));
+            document.getElementById('playPauseBtn').textContent = '⏸';
+        }
+        isPlaying = !isPlaying;
+    }
+
+    function nextSong() {
+        currentSongIndex = (currentSongIndex + 1) % allSongs.length;
+        playSong(currentSongIndex);
+    }
+
+    function prevSong() {
+        currentSongIndex = (currentSongIndex - 1 + allSongs.length) % allSongs.length;
+        playSong(currentSongIndex);
+    }
+
+    function updatePlayer(song) {
+        document.getElementById('playerArt').src = song.image || 'https://via.placeholder.com/50?text=Song';
+        document.getElementById('playerTitle').textContent = song.title || 'No Song Playing';
+        document.getElementById('playerArtist').textContent = song.artist || 'Select a Song';
+        document.getElementById('totalTime').textContent = formatDuration(song.duration || 0);
+    }
+
+    function updateProgress() {
+        if (audio.duration && !isNaN(audio.duration)) {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('progressFilled').style.width = progress + '%';
+            document.getElementById('currentTime').textContent = formatDuration(audio.currentTime);
+        }
+    }
+
+    document.getElementById('progress').addEventListener('click', (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const width = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = width * audio.duration;
+    });
+
+    function addToQueue(index) {
+        const song = allSongs[index];
+        queue.push({ ...song, emoji: "🎶" });
+        updateQueue();
+    }
+
+    function updateQueue() {
+        const container = document.getElementById('queueList');
+        container.innerHTML = queue.map((song) => `
+            <div class="queue-item">
+                <img src="${song.image || 'https://via.placeholder.com/40?text=Song'}" alt="">
+                <div>
+                    <div class="queue-title">${song.emoji || ''} ${song.title || 'Unknown'}</div>
+                    <div class="queue-artist">${song.artist || 'Unknown'}</div>
+                </div>
+                <div class="queue-duration">${formatDuration(song.duration)}</div>
+            </div>
+        `).join('');
+    }
+
+    function toggleQueue() {
+        const queueEl = document.getElementById('queue');
+        queueEl.classList.toggle('open');
+    }
+
+    function downloadSong(url, title) {
+        if (url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.replace(/[^a-z0-9]/gi, '_')}.mp3`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } else {
+            alert('Download not available');
+        }
+    }
+
+    // Event listeners
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended', nextSong);
+
+    // Initial setup
+    document.getElementById('loginOverlay').style.display = 'flex';
+    loadInitialQueue();
+</script>
 </html>
